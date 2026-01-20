@@ -1,0 +1,42 @@
+ER Diagram (text)
+
+TENANTS (tenants.id)
+  |--< SITES (sites.tenant_id)
+  |--< ASSETS (assets.tenant_id)
+  |--< DOCUMENTS (documents.tenant_id)
+  |--< DOCUMENT_VERSIONS (document_versions.tenant_id)
+  |--< USER_GROUPS (user_groups.tenant_id)
+  |--< USER_GROUP_MEMBERS (user_group_members.tenant_id)
+  |--< TICKETS (tickets.tenant_id)
+  |--< TICKET_GROUP_ASSIGNMENTS (ticket_group_assignments.tenant_id)
+  |--< FIELD_UPDATES (field_updates.tenant_id)
+  |--< PROFILES (profiles.tenant_id)
+
+SITES (sites.id)
+  |--< ASSETS (assets.site_id)
+
+ASSETS (assets.id)
+  |--< DOCUMENTS (documents.equipment_id) [optional link]
+  |--< DOCUMENT_EQUIPMENTS (document_equipments.equipment_id)
+  |--< TICKETS (tickets.equipment_id)
+
+DOCUMENTS (documents.id)
+  |--< DOCUMENT_VERSIONS (document_versions.document_id)
+  |--< DOCUMENT_EQUIPMENTS (document_equipments.document_id)
+
+USER_GROUPS (user_groups.id)
+  |--< USER_GROUP_MEMBERS (user_group_members.group_id)
+  |--< TICKET_GROUP_ASSIGNMENTS (ticket_group_assignments.group_id)
+
+PROFILES (profiles.id)
+  |--< USER_GROUP_MEMBERS (user_group_members.user_id)
+  |--< FIELD_UPDATES (field_updates.user_id)
+  |--< TICKETS (tickets.opened_by_id, tickets.assigned_to_id)
+
+TICKETS (tickets.id)
+  |--< TICKET_GROUP_ASSIGNMENTS (ticket_group_assignments.ticket_id)
+
+Notes:
+- document_equipments is a many-to-many join between documents and assets.
+- tickets.assigned_group_ids is a uuid[] that mirrors ticket_group_assignments.
+- profiles are created by auth trigger handle_new_user().

@@ -1,0 +1,138 @@
+RELATÓRIO TÉCNICO DAS INSTALAÇÕES ELÉTRICAS – RTI​
+Empresa / Unidade / Endereço​
+Data(s) de inspeção: [dd/mm/aaaa a dd/mm/aaaa]​
+Responsável técnico: [Nome, CREA, ART]​
+Revisão: [Rev. xx]
+
+1. Introdução
+●​ Contexto da unidade (processo produtivo / criticidade elétrica / histórico de
+intervenções)
+●​ Finalidade do RTI dentro do PIE e atendimento NR-10 (item “g”).​
+RTI-rev01a - introdução
+
+2. Objetivos
+Modelo (texto pronto):
+●​ Identificar e registrar não conformidades e oportunidades de melhoria nas
+instalações elétricas;
+●​ Avaliar medidas de controle do risco elétrico e riscos adicionais;
+●​ Recomendar adequações com priorização (alto/médio/baixo) e cronograma;
+●​ Produzir evidências para manutenção do PIE atualizado.
+
+3. Metodologia
+3.1 Base normativa da verificação
+●​ Inspeção visual e ensaios conforme aplicável.
+●​ Registro fotográfico e entrevistas operacionais.
+
+3.2 Itens mínimos verificados (checklist técnico)
+●​
+●​
+●​
+●​
+●​
+●​
+●​
+●​
+●​
+
+Medidas de proteção contra choques elétricos (contato direto/indireto)
+Dispositivos de seccionamento e comando
+Proteções (sobrecorrente/DR, seletividade quando aplicável)
+Identificação/rotulagem de quadros/circuitos
+Condições de influências externas (umidade, corrosão, poeira, temperatura)
+Conexões, barramentos, aquecimento, aperto, sinais de arco
+Aterramento/equipotencialização
+SPDA (integridade, conexões, corrosão, documentação)
+Documentos (unifilares, as built, ARTs, treinamentos, autorizações)
+
+3.3 Critérios de priorização (modelo simples)
+●​ Prioridade 1 (Alta): risco de choque/arco/incêndio iminente, exposição direta, falhas
+críticas
+●​ Prioridade 2 (Média): não conformidades relevantes sem risco imediato, mas com
+potencial de agravamento
+●​ Prioridade 3 (Baixa): adequações finais, padronizações, melhorias sem risco
+imediato
+
+4. Normas e Referências Utilizadas
+Modelo (lista-base que você ajusta conforme o caso):
+●​ NR-10 – Segurança em Instalações e Serviços em Eletricidade (principal, força
+legal)
+●​ ABNT NBR 5410 – Instalações elétricas de baixa tensão
+●​ ABNT NBR 14039 – Instalações elétricas de média tensão (quando houver MT)
+●​ ABNT NBR 5419 – SPDA (quando houver)
+●​ Outras aplicáveis à unidade (áreas classificadas, tomadas/plugues, iluminação etc.)
+
+5. Dados da Empresa
+●​ Razão social / CNPJ / CNAE / endereço
+●​ Responsáveis internos (manutenção/utilidades)
+●​ Regime operacional (turnos, paradas programadas, criticidades)
+
+6. Situação do PIE (conformidade documental)
+6.1 Itens do PIE conferidos (NR-10 10.2.4 + 10.2.3)​
+Marque: 1-Sim 2-Parcial 3-Não, e justifique.
+​ Unifilares atualizados + aterramento e dispositivos de proteção (10.2.3)
+​ Procedimentos / instruções / medidas de controle (10.2.4 “a”)
+​ SPDA e aterramentos: inspeções e medições (10.2.4 “b”)
+​ EPC/EPI/ferramental (10.2.4 “c”)
+​ Qualificação/habilitação/capacitação/autorização + treinamentos (10.2.4 “d”)
+​ Testes de isolação em EPC/EPI (10.2.4 “e”)
+​ Certificações (áreas classificadas, se houver) (10.2.4 “f”)
+​ RTI com recomendações e cronograma (10.2.4 “g”)​
+
+7. Avaliação Técnica das Instalações (por sistemas)
+Aqui você descreve por “macro-blocos” (subestação, QGBT, CCMs, quadros de
+distribuição, gerador, UPS, iluminação/tomadas, máquinas, etc.)
+7.1 Entrada de energia / medição / subestação (se houver)
+●​ Condições gerais, acesso, sinalização, segurança de painéis
+●​ Aterramento e equipotencialização
+●​ Proteções e ajustes documentados
+7.2 Quadros/painéis (QGBT/QDG/QDF/CCM)
+●​ Grau de proteção, barreiras internas, aberturas, identificação
+●​ Organização de cabos, terminais, aquecimento, sinais de arco
+●​ Espaçamento, ventilação e limpeza técnica
+7.3 Circuitos finais e tomadas
+●​ DR onde aplicável, polaridade, aterramento, identificação
+●​ Integridade de tomadas, extensões, improvisos
+7.4 SPDA e aterramentos
+●​ Integridade visível, corrosão, conexões
+●​ Evidência de laudos e medições
+
+8. Não Conformidades e Recomendações (com Plano de Ação)
+●​
+●​
+●​
+●​
+●​
+
+O que foi visto (objetivo)
+Por que é problema (risco)
+Qual requisito mínimo (norma/item)
+Qual ação corretiva (o que/como)
+Critério de aceite (como comprovar)
+
+9. Cronograma Consolidado
+●​ Curto prazo (0–30 dias) – Prioridade 1
+●​ Médio prazo (31–90 dias) – Prioridade 2
+●​ Longo prazo (>90 dias) – Prioridade 3
+
+10. Responsabilidades e Declarações
+●​ Elaboração por profissional legalmente habilitado (RT/CREA/ART)​
+RTI-rev01a - introdução
+●​ Responsáveis internos por execução das adequações
+●​ Responsáveis pela manutenção do PIE atualizado (designação formal)
+
+11. Anexos (modelo)
+●​
+●​
+●​
+●​
+●​
+●​
+
+Anexo A – Registro fotográfico (com legenda por NC-ID)
+Anexo B – Unifilares “as built” (ou lista de pendências)
+Anexo C – Medições (aterramento, continuidade, isolação, termografia, etc.)
+Anexo D – Certificados de EPI/EPC (ensaios dielétricos)
+Anexo E – Treinamentos e autorizações (NR-10/SEP, quando houver)
+Anexo F – ART e documentos do RT
+
+

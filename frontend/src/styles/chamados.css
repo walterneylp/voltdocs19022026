@@ -1,0 +1,547 @@
+:root {
+  --chamados-bg: #f5f8fb;
+  --chamados-sidebar: #0f172a;
+  --chamados-text: #0f172a;
+  --chamados-muted: #6b7a90;
+  --chamados-border: #e6edf5;
+  --chamados-card: #ffffff;
+  --chamados-accent: #1f4fd6;
+  --chamados-danger: #ef4444;
+  --chamados-success: #10b981;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: var(--chamados-bg);
+  color: var(--chamados-text);
+}
+
+.chamados {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+}
+
+.chamados-sidebar {
+  background: var(--chamados-sidebar);
+  color: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px 16px;
+}
+
+.chamados-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.chamados-logo {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--chamados-accent);
+}
+
+.chamados-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.chamados-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chamados-label {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #7c8aa1;
+}
+
+.chamados-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.chamados-item.is-active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.chamados-icon {
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  flex: 0 0 auto;
+}
+
+.chamados-item.is-active .chamados-icon {
+  color: #ffffff;
+}
+
+.chamados-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chamados-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.chamados-user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chamados-user-name {
+  margin: 0;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.chamados-user-email {
+  margin: 0;
+  font-size: 12px;
+  color: #7c8aa1;
+}
+
+.chamados-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.chamados-topbar {
+  height: 50px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--chamados-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.chamados-org {
+  font-size: 14px;
+  color: var(--chamados-muted);
+}
+
+.chamados-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.chamados-bell {
+  width: 20px;
+  height: 20px;
+  color: var(--chamados-muted);
+}
+
+.chamados-logout {
+  border: none;
+  background: transparent;
+  color: var(--chamados-danger);
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.chamados-logout-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.chamados-main {
+  padding: 20px 24px 40px;
+}
+
+.chamados-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.chamados-header h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.chamados-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--chamados-muted);
+  line-height: 1.4;
+}
+
+.chamados-new {
+  border: none;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.chamados-plus {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  align-items: center;
+  justify-content: center;
+}
+
+.chamados-plus-icon {
+  width: 14px;
+  height: 14px;
+  color: #ffffff;
+}
+
+.chamados-summary {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.chamados-summary-card {
+  border: 1px solid var(--chamados-border);
+  background: var(--chamados-card);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chamados-summary-card p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--chamados-muted);
+  font-weight: 600;
+}
+
+.chamados-summary-card strong {
+  font-size: 22px;
+  color: var(--chamados-text);
+}
+
+.chamados-filters {
+  margin-top: 16px;
+  background: var(--chamados-card);
+  border: 1px solid var(--chamados-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.chamados-filter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chamados-filter label {
+  font-size: 12px;
+  color: var(--chamados-muted);
+  font-weight: 600;
+}
+
+.chamados-input,
+.chamados-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--chamados-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #ffffff;
+}
+
+.chamados-input input,
+.chamados-select select {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--chamados-text);
+  background: transparent;
+}
+
+.chamados-input-icon {
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+}
+
+.chamados-select {
+  position: relative;
+}
+
+.chamados-select select {
+  appearance: none;
+}
+
+.chamados-select-icon {
+  position: absolute;
+  right: 10px;
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.chamados-filter-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--chamados-border);
+  border-radius: 8px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 20;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.chamados-filter-item {
+  border: none;
+  background: #ffffff;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.chamados-filter-item:hover {
+  background: #f1f5f9;
+}
+
+.chamados-filter-checks {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.chamados-filter-checks p {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--chamados-muted);
+  font-weight: 700;
+}
+
+.chamados-card {
+  margin-top: 16px;
+  background: var(--chamados-card);
+  border: 1px solid var(--chamados-border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.chamados-empty {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--chamados-border);
+  border-radius: 10px;
+  background: var(--chamados-card);
+  font-size: 13px;
+  color: var(--chamados-muted);
+}
+
+.chamados-error {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: #d14343;
+}
+
+.chamados-card-left {
+  display: flex;
+  gap: 12px;
+}
+
+.chamados-status-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--chamados-success);
+}
+
+.chamados-status-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.chamados-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.chamados-badge {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--chamados-danger);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.chamados-card-desc {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--chamados-muted);
+  line-height: 1.4;
+}
+
+.chamados-card-meta {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.chamados-card-pill {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #2563eb;
+  background: #eaf2ff;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.chamados-pill-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.chamados-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.chamados-resolvido {
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.chamados-edit {
+  border: none;
+  background: transparent;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.chamados-edit-icon {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 980px) {
+  .chamados {
+    grid-template-columns: 1fr;
+  }
+
+  .chamados-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .chamados-content {
+    min-height: auto;
+  }
+
+  .chamados-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chamados-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chamados-card-right {
+    align-items: flex-start;
+  }
+
+  .chamados-summary,
+  .chamados-filters,
+  .chamados-filter-checks {
+    grid-template-columns: 1fr;
+  }
+}

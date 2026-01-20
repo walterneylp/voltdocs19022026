@@ -1,0 +1,135 @@
+import { Router } from "express";
+import { asyncHandler } from "../lib/async-handler.js";
+import { requireAuth } from "../middleware/auth.js";
+import { getAssets, patchAsset, postAsset, removeAsset } from "../controllers/assets-controller.js";
+import { getSites, patchSite, postSite, removeSite } from "../controllers/sites-controller.js";
+import {
+  getDocuments,
+  getDocumentEquipments,
+  getDocumentVersions,
+  getDocumentVersionUrl,
+  deleteDocumentLinks,
+  removeDocumentVersion,
+  patchDocument,
+  removeDocument,
+  postDocument,
+  postDocumentLink,
+  postDocumentVersion
+} from "../controllers/documents-controller.js";
+import { uploadDocumentFile } from "../controllers/document-uploads-controller.js";
+import {
+  getDocumentCategories,
+  postDocumentCategory,
+  patchDocumentCategory,
+  deleteDocumentCategoryById
+} from "../controllers/document-categories-controller.js";
+import multer from "multer";
+import {
+  getTickets,
+  patchTicket,
+  postTicket,
+  postTicketGroupAssignment
+} from "../controllers/tickets-controller.js";
+import {
+  getFieldUpdates,
+  getFieldUpdateFileUrl,
+  patchFieldUpdate,
+  postFieldUpdate,
+  uploadFieldUpdateFiles
+} from "../controllers/field-updates-controller.js";
+import {
+  getProfiles,
+  getUserGroups,
+  getUserGroupMembers,
+  patchUserGroup,
+  postUserGroup,
+  postUserGroupMember,
+  deleteUserGroupMember
+} from "../controllers/profiles-controller.js";
+import { login, me, refreshSession, updatePassword } from "../controllers/auth-controller.js";
+import {
+  blockUser,
+  createUser,
+  deleteUser,
+  getUsers,
+  updateUser
+} from "../controllers/users-controller.js";
+import {
+  getCompanyProfiles,
+  patchCompanyProfile,
+  postCompanyProfile,
+  removeCompanyProfile
+} from "../controllers/company-profiles-controller.js";
+
+export const apiRouter = Router();
+
+apiRouter.get("/health", (_req, res) => res.json({ ok: true }));
+apiRouter.post("/auth/login", asyncHandler(login));
+apiRouter.post("/auth/refresh", asyncHandler(refreshSession));
+
+apiRouter.use(requireAuth);
+
+apiRouter.get("/auth/me", asyncHandler(me));
+apiRouter.post("/auth/password", asyncHandler(updatePassword));
+
+apiRouter.get("/assets", asyncHandler(getAssets));
+apiRouter.post("/assets", asyncHandler(postAsset));
+apiRouter.patch("/assets/:id", asyncHandler(patchAsset));
+apiRouter.delete("/assets/:id", asyncHandler(removeAsset));
+
+apiRouter.get("/sites", asyncHandler(getSites));
+apiRouter.post("/sites", asyncHandler(postSite));
+apiRouter.patch("/sites/:id", asyncHandler(patchSite));
+apiRouter.delete("/sites/:id", asyncHandler(removeSite));
+
+apiRouter.get("/documents", asyncHandler(getDocuments));
+apiRouter.get("/document-equipments", asyncHandler(getDocumentEquipments));
+apiRouter.get("/document-versions", asyncHandler(getDocumentVersions));
+apiRouter.get("/document-versions/:id/url", asyncHandler(getDocumentVersionUrl));
+apiRouter.post("/documents", asyncHandler(postDocument));
+apiRouter.patch("/documents/:id", asyncHandler(patchDocument));
+apiRouter.delete("/documents/:id", asyncHandler(removeDocument));
+apiRouter.delete("/document-versions/:id", asyncHandler(removeDocumentVersion));
+apiRouter.post("/documents/versions", asyncHandler(postDocumentVersion));
+apiRouter.post("/documents/link", asyncHandler(postDocumentLink));
+apiRouter.delete("/documents/link", asyncHandler(deleteDocumentLinks));
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
+apiRouter.post("/documents/upload", upload.single("file"), asyncHandler(uploadDocumentFile));
+
+apiRouter.get("/document-categories", asyncHandler(getDocumentCategories));
+apiRouter.post("/document-categories", asyncHandler(postDocumentCategory));
+apiRouter.patch("/document-categories/:id", asyncHandler(patchDocumentCategory));
+apiRouter.delete("/document-categories/:id", asyncHandler(deleteDocumentCategoryById));
+
+apiRouter.get("/tickets", asyncHandler(getTickets));
+apiRouter.post("/tickets", asyncHandler(postTicket));
+apiRouter.patch("/tickets/:id", asyncHandler(patchTicket));
+apiRouter.post("/tickets/groups", asyncHandler(postTicketGroupAssignment));
+
+apiRouter.get("/field-updates", asyncHandler(getFieldUpdates));
+apiRouter.post("/field-updates", asyncHandler(postFieldUpdate));
+apiRouter.patch("/field-updates/:id", asyncHandler(patchFieldUpdate));
+apiRouter.post("/field-updates/file-url", asyncHandler(getFieldUpdateFileUrl));
+apiRouter.post(
+  "/field-updates/upload",
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } }).array("files", 10),
+  asyncHandler(uploadFieldUpdateFiles)
+);
+
+apiRouter.get("/profiles", asyncHandler(getProfiles));
+apiRouter.get("/user-groups", asyncHandler(getUserGroups));
+apiRouter.get("/user-groups/members", asyncHandler(getUserGroupMembers));
+apiRouter.post("/user-groups", asyncHandler(postUserGroup));
+apiRouter.patch("/user-groups/:id", asyncHandler(patchUserGroup));
+apiRouter.post("/user-groups/members", asyncHandler(postUserGroupMember));
+apiRouter.delete("/user-groups/members", asyncHandler(deleteUserGroupMember));
+apiRouter.get("/users", asyncHandler(getUsers));
+apiRouter.post("/users", asyncHandler(createUser));
+apiRouter.patch("/users/:id", asyncHandler(updateUser));
+apiRouter.delete("/users/:id", asyncHandler(deleteUser));
+apiRouter.post("/users/:id/block", asyncHandler(blockUser));
+
+apiRouter.get("/company-profiles", asyncHandler(getCompanyProfiles));
+apiRouter.post("/company-profiles", asyncHandler(postCompanyProfile));
+apiRouter.patch("/company-profiles/:id", asyncHandler(patchCompanyProfile));
+apiRouter.delete("/company-profiles/:id", asyncHandler(removeCompanyProfile));

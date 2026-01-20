@@ -1,0 +1,373 @@
+.documentos-novo {
+  position: relative;
+}
+
+.documentos-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+}
+
+.documentos-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 560px;
+  max-width: calc(100% - 32px);
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e6edf5;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+}
+
+.documentos-modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #e6edf5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.documentos-modal-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.documentos-modal-close {
+  border: none;
+  background: transparent;
+  color: #6b7a90;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+.documentos-modal-close-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.documentos-modal-body {
+  padding: 16px 18px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.documentos-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.documentos-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2b3345;
+}
+
+.documentos-field input {
+  border: 1px solid #e6edf5;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1f2937;
+  background: #ffffff;
+}
+
+.documentos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.documentos-select,
+.documentos-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e6edf5;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #ffffff;
+}
+
+.documentos-select {
+  position: relative;
+}
+
+.documentos-select select {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1f2937;
+  background: transparent;
+  appearance: none;
+}
+
+.documentos-select-icon {
+  position: absolute;
+  right: 10px;
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.documentos-date input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1f2937;
+  background: transparent;
+}
+
+.documentos-date-icon {
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+}
+
+.documentos-checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.documentos-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #1f2937;
+}
+
+.documentos-check input {
+  width: 14px;
+  height: 14px;
+}
+
+.documentos-check-muted {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.documentos-help {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.documentos-asset-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.documentos-asset-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.documentos-asset-add {
+  border: 1px solid #e6edf5;
+  background: #ffffff;
+  color: #1f2937;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.documentos-asset-results {
+  border: 1px solid #e6edf5;
+  border-radius: 6px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.documentos-asset-result {
+  border: none;
+  background: #ffffff;
+  padding: 6px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.documentos-asset-result:hover {
+  background: #f1f5f9;
+}
+
+.documentos-asset-result-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1f2937;
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.documentos-asset-result-name {
+  font-size: 12px;
+  color: #475569;
+}
+
+.documentos-asset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.documentos-asset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  color: #1f2937;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.documentos-asset-chip button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.documentos-asset-chip-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.documentos-asset-empty {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.documentos-file {
+  border: 1px solid #e6edf5;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #6b7a90;
+}
+
+.documentos-file button {
+  border: none;
+  background: #f8fafc;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.documentos-file-input {
+  display: none;
+}
+
+.documentos-file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid #e6edf5;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.documentos-file-name {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.documentos-file-delete {
+  border: 1px solid #fecaca;
+  background: #ffffff;
+  color: #dc2626;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.documentos-file-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.documentos-error {
+  margin: 0;
+  font-size: 12px;
+  color: #d14343;
+}
+
+.documentos-modal-footer {
+  padding: 12px 18px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.documentos-modal-cancel {
+  border: 1px solid #e6edf5;
+  background: #ffffff;
+  color: #4b5563;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.documentos-modal-save {
+  border: none;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .documentos-modal {
+    width: 94%;
+  }
+
+  .documentos-grid,
+  .documentos-checks {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,97 @@
+:root {
+  --alterar-bg: #f3f6fb;
+  --alterar-card: #ffffff;
+  --alterar-border: #e6edf5;
+  --alterar-text: #1f2937;
+  --alterar-muted: #6b7a90;
+  --alterar-primary: #0f172a;
+}
+
+.alterar-senha-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: var(--alterar-bg);
+  padding: 24px;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  color: var(--alterar-text);
+}
+
+.alterar-senha-card {
+  width: min(480px, 100%);
+  background: var(--alterar-card);
+  border-radius: 12px;
+  border: 1px solid var(--alterar-border);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  padding: 24px;
+}
+
+.alterar-senha-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.alterar-senha-header p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--alterar-muted);
+}
+
+.alterar-senha-form {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alterar-senha-form label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.alterar-senha-form input {
+  border: 1px solid var(--alterar-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.alterar-senha-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.alterar-senha-cancel {
+  border: 1px solid var(--alterar-border);
+  background: #ffffff;
+  color: #4b5563;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.alterar-senha-submit {
+  border: none;
+  background: var(--alterar-primary);
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.alterar-senha-submit[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.alterar-senha-error {
+  margin: 0;
+  font-size: 12px;
+  color: #d14343;
+}

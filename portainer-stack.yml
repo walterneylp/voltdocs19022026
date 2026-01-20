@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  voltdocs:
+    image: walterneylp/voltdocs:latest
+    networks:
+      - apogeuNet
+    deploy:
+      replicas: 1
+      labels:
+        - traefik.enable=true
+
+        # HTTPS for Main Site
+        - traefik.http.routers.voltdocs.rule=Host(`voltdocs.apogeuautomacao.ia.br`)
+        - traefik.http.routers.voltdocs.entrypoints=websecure
+        - traefik.http.routers.voltdocs.tls.certresolver=letsencryptresolver
+        - traefik.http.services.voltdocs.loadbalancer.server.port=80
+
+        # HTTP -> HTTPS redirect
+        - traefik.http.routers.voltdocs-http.rule=Host(`voltdocs.apogeuautomacao.ia.br`)
+        - traefik.http.routers.voltdocs-http.entrypoints=web
+        - traefik.http.routers.voltdocs-http.middlewares=redirect-to-https
+        - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+    expose:
+      - "80"
+    environment:
+      PORT: 80
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
+    restart: always
+
+networks:
+  apogeuNet:
+    external: true

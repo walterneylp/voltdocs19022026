@@ -1,0 +1,2359 @@
+Você é um engenheiro de software sênior. Eu perdi a aplicação, mas o BANCO DE DADOS EXISTE e NÃO pode ser alterado.
+Objetivo: reconstruir a aplicação consumindo o banco atual (Supabase/Postgres) SEM migrations e SEM mudanças de schema.
+
+REGRAS OBRIGATÓRIAS
+1) NÃO executar CREATE/ALTER/DROP em tabelas, views, functions, triggers ou policies.
+2) NÃO sugerir migrations. O schema atual é a fonte de verdade.
+3) Você pode criar somente código da aplicação (backend/frontend) e, se necessário, scripts READ-ONLY para inspeção.
+4) Respeite RLS e policies do Supabase. Se algum acesso falhar, proponha ajustes no código (service role apenas em backend seguro).
+5) Gere: modelo de domínio, endpoints/rotas, fluxos de tela, validações, regras de negócio inferidas e camada de acesso a dados.
+
+CONTEXTO DO BANCO (cole abaixo)
+=== TABELAS E COLUNAS ===
+[
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 2,
+    "column_name": "tag",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 3,
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 4,
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 5,
+    "column_name": "patrimony_number",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 6,
+    "column_name": "voltage",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 7,
+    "column_name": "current_rating",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 8,
+    "column_name": "atpv",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 9,
+    "column_name": "risk_level",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 10,
+    "column_name": "site_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 11,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 12,
+    "column_name": "qr_code_uuid",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "(uuid_generate_v4())::text"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "ordinal_position": 13,
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "ordinal_position": 2,
+    "column_name": "document_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "ordinal_position": 3,
+    "column_name": "equipment_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "ordinal_position": 4,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "ordinal_position": 5,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "now()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 2,
+    "column_name": "document_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 3,
+    "column_name": "version",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 4,
+    "column_name": "file_path",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 5,
+    "column_name": "file_name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 6,
+    "column_name": "valid_from",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 7,
+    "column_name": "valid_until",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 8,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "ordinal_position": 9,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "ordinal_position": 2,
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "ordinal_position": 3,
+    "column_name": "category",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "ordinal_position": 4,
+    "column_name": "equipment_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "ordinal_position": 5,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "ordinal_position": 6,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 2,
+    "column_name": "base_path",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 3,
+    "column_name": "message",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 4,
+    "column_name": "code",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 5,
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 6,
+    "column_name": "user_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 7,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 8,
+    "column_name": "attachments",
+    "data_type": "ARRAY",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 9,
+    "column_name": "audio_path",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 10,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "now()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 11,
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'PENDING'::text"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 12,
+    "column_name": "close_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 13,
+    "column_name": "closed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 14,
+    "column_name": "closed_by_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "ordinal_position": 15,
+    "column_name": "closed_by_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "ordinal_position": 2,
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "ordinal_position": 3,
+    "column_name": "role",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "ordinal_position": 4,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "ordinal_position": 5,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "ordinal_position": 6,
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "ordinal_position": 2,
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "ordinal_position": 3,
+    "column_name": "address",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "ordinal_position": 4,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "ordinal_position": 5,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "ordinal_position": 2,
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "ordinal_position": 3,
+    "column_name": "slug",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "ordinal_position": 4,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "ordinal_position": 1,
+    "column_name": "ticket_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "ordinal_position": 2,
+    "column_name": "group_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "ordinal_position": 3,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 2,
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 3,
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 4,
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 5,
+    "column_name": "priority",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 6,
+    "column_name": "equipment_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 7,
+    "column_name": "opened_by_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 8,
+    "column_name": "assigned_to_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 9,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 10,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 11,
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "ordinal_position": 12,
+    "column_name": "assigned_group_ids",
+    "data_type": "ARRAY",
+    "is_nullable": "YES",
+    "column_default": "'{}'::uuid[]"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "ordinal_position": 1,
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "ordinal_position": 2,
+    "column_name": "group_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "ordinal_position": 3,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "ordinal_position": 1,
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "ordinal_position": 2,
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "ordinal_position": 3,
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "ordinal_position": 4,
+    "column_name": "tenant_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "ordinal_position": 5,
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  }
+]
+
+=== CONSTRAINTS ===
+[
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_11_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_13_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_qr_code_uuid_key",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_risk_level_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_site_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "2200_21337_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "2200_21337_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "2200_21337_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "2200_21337_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "document_equipments_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "fk_doc",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "fk_eq",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "fk_tenant",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "uq_doc_eq",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_8_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_9_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "document_versions_document_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "document_versions_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "document_versions_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_6_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "documents_equipment_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "documents_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "documents_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "2200_21384_10_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "2200_21384_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "2200_21384_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "2200_21384_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "field_updates_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "fk_tenant",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "fk_user",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "2200_17499_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "2200_17499_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_role_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "2200_17518_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "2200_17518_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "2200_17518_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "2200_17518_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "sites_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "sites_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "2200_17488_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "2200_17488_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "2200_17488_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "2200_17488_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "tenants_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "tenants_slug_key",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "2200_17659_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "2200_17659_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "2200_17659_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "ticket_group_assignments_group_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "ticket_group_assignments_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "ticket_group_assignments_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "ticket_group_assignments_ticket_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_10_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_11_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_6_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_9_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_assigned_to_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_equipment_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_opened_by_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_priority_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_status_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "2200_17546_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "2200_17546_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "2200_17546_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "user_group_members_group_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "user_group_members_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "user_group_members_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "user_group_members_user_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "2200_17532_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "2200_17532_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "2200_17532_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "2200_17532_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "user_groups_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "user_groups_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  }
+]
+
+=== FOREIGN KEYS ===
+[
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_11_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_13_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "2200_17566_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_qr_code_uuid_key",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_risk_level_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_site_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "assets",
+    "constraint_name": "assets_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "2200_21337_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "2200_21337_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "2200_21337_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "2200_21337_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "document_equipments_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "fk_doc",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "fk_eq",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "fk_tenant",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_equipments",
+    "constraint_name": "uq_doc_eq",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_8_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "2200_17608_9_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "document_versions_document_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "document_versions_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "document_versions",
+    "constraint_name": "document_versions_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "2200_17589_6_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "documents_equipment_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "documents_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "documents",
+    "constraint_name": "documents_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "2200_21384_10_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "2200_21384_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "2200_21384_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "2200_21384_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "field_updates_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "fk_tenant",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "field_updates",
+    "constraint_name": "fk_user",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "2200_17499_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "2200_17499_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_role_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "constraint_name": "profiles_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "2200_17518_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "2200_17518_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "2200_17518_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "2200_17518_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "sites_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sites",
+    "constraint_name": "sites_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "2200_17488_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "2200_17488_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "2200_17488_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "2200_17488_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "tenants_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tenants",
+    "constraint_name": "tenants_slug_key",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "2200_17659_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "2200_17659_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "2200_17659_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "ticket_group_assignments_group_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "ticket_group_assignments_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "ticket_group_assignments_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ticket_group_assignments",
+    "constraint_name": "ticket_group_assignments_ticket_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_10_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_11_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_6_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "2200_17627_9_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_assigned_to_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_equipment_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_opened_by_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_priority_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_status_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "tickets",
+    "constraint_name": "tickets_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "2200_17546_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "2200_17546_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "2200_17546_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "user_group_members_group_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "user_group_members_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "user_group_members_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_group_members",
+    "constraint_name": "user_group_members_user_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "2200_17532_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "2200_17532_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "2200_17532_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "2200_17532_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "user_groups_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_groups",
+    "constraint_name": "user_groups_tenant_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  }
+]
+
+=== ÍNDICES ===
+[
+  {
+    "schemaname": "public",
+    "tablename": "assets",
+    "indexname": "assets_pkey",
+    "indexdef": "CREATE UNIQUE INDEX assets_pkey ON public.assets USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "assets",
+    "indexname": "assets_qr_code_uuid_key",
+    "indexdef": "CREATE UNIQUE INDEX assets_qr_code_uuid_key ON public.assets USING btree (qr_code_uuid)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_equipments",
+    "indexname": "document_equipments_pkey",
+    "indexdef": "CREATE UNIQUE INDEX document_equipments_pkey ON public.document_equipments USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_equipments",
+    "indexname": "idx_document_equipments_document_id",
+    "indexdef": "CREATE INDEX idx_document_equipments_document_id ON public.document_equipments USING btree (document_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_equipments",
+    "indexname": "idx_document_equipments_equipment_id",
+    "indexdef": "CREATE INDEX idx_document_equipments_equipment_id ON public.document_equipments USING btree (equipment_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_equipments",
+    "indexname": "uq_doc_eq",
+    "indexdef": "CREATE UNIQUE INDEX uq_doc_eq ON public.document_equipments USING btree (document_id, equipment_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_versions",
+    "indexname": "document_versions_pkey",
+    "indexdef": "CREATE UNIQUE INDEX document_versions_pkey ON public.document_versions USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "documents",
+    "indexname": "documents_pkey",
+    "indexdef": "CREATE UNIQUE INDEX documents_pkey ON public.documents USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "field_updates",
+    "indexname": "field_updates_pkey",
+    "indexdef": "CREATE UNIQUE INDEX field_updates_pkey ON public.field_updates USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "field_updates",
+    "indexname": "idx_field_updates_created_at",
+    "indexdef": "CREATE INDEX idx_field_updates_created_at ON public.field_updates USING btree (created_at DESC)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "field_updates",
+    "indexname": "idx_field_updates_status",
+    "indexdef": "CREATE INDEX idx_field_updates_status ON public.field_updates USING btree (status)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "field_updates",
+    "indexname": "idx_field_updates_tenant_id",
+    "indexdef": "CREATE INDEX idx_field_updates_tenant_id ON public.field_updates USING btree (tenant_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "field_updates",
+    "indexname": "idx_field_updates_user_id",
+    "indexdef": "CREATE INDEX idx_field_updates_user_id ON public.field_updates USING btree (user_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "indexname": "profiles_pkey",
+    "indexdef": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "indexname": "profiles_tenant_email_idx",
+    "indexdef": "CREATE UNIQUE INDEX profiles_tenant_email_idx ON public.profiles USING btree (tenant_id, email)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "sites",
+    "indexname": "sites_pkey",
+    "indexdef": "CREATE UNIQUE INDEX sites_pkey ON public.sites USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tenants",
+    "indexname": "tenants_pkey",
+    "indexdef": "CREATE UNIQUE INDEX tenants_pkey ON public.tenants USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tenants",
+    "indexname": "tenants_slug_key",
+    "indexdef": "CREATE UNIQUE INDEX tenants_slug_key ON public.tenants USING btree (slug)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "ticket_group_assignments",
+    "indexname": "ticket_group_assignments_pkey",
+    "indexdef": "CREATE UNIQUE INDEX ticket_group_assignments_pkey ON public.ticket_group_assignments USING btree (ticket_id, group_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tickets",
+    "indexname": "idx_tickets_assigned_groups",
+    "indexdef": "CREATE INDEX idx_tickets_assigned_groups ON public.tickets USING gin (assigned_group_ids)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tickets",
+    "indexname": "tickets_pkey",
+    "indexdef": "CREATE UNIQUE INDEX tickets_pkey ON public.tickets USING btree (id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_group_members",
+    "indexname": "user_group_members_pkey",
+    "indexdef": "CREATE UNIQUE INDEX user_group_members_pkey ON public.user_group_members USING btree (user_id, group_id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_groups",
+    "indexname": "user_groups_pkey",
+    "indexdef": "CREATE UNIQUE INDEX user_groups_pkey ON public.user_groups USING btree (id)"
+  }
+]
+
+
+=== FUNÇÕES ===
+[
+  {
+    "schema_name": "public",
+    "function_name": "get_my_tenant_id",
+    "function_ddl": "CREATE OR REPLACE FUNCTION public.get_my_tenant_id()\n RETURNS uuid\n LANGUAGE sql\n SECURITY DEFINER\nAS $function$\n  select tenant_id from public.profiles where id = auth.uid()\n$function$\n"
+  },
+  {
+    "schema_name": "public",
+    "function_name": "handle_new_user",
+    "function_ddl": "CREATE OR REPLACE FUNCTION public.handle_new_user()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\nbegin\n  insert into public.profiles (id, email, name, role, tenant_id)\n  values (\n    new.id, \n    new.email, \n    new.raw_user_meta_data->>'name',\n    coalesce(new.raw_user_meta_data->>'role', 'TECHNICIAN'),\n    (new.raw_user_meta_data->>'tenant_id')::uuid\n  );\n  return new;\nend;\n$function$\n"
+  }
+]
+
+
+=== RLS POLICIES ===
+[
+  {
+    "schemaname": "public",
+    "tablename": "assets",
+    "policyname": "Access own tenant data",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(tenant_id = get_my_tenant_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_versions",
+    "policyname": "Access own tenant data",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(tenant_id = get_my_tenant_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_versions",
+    "policyname": "doc_versions insert by tenant",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((auth.jwt() ? 'tenant_id'::text) AND (tenant_id = ((auth.jwt() ->> 'tenant_id'::text))::uuid))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_versions",
+    "policyname": "doc_versions select by tenant",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "((auth.jwt() ? 'tenant_id'::text) AND (tenant_id = ((auth.jwt() ->> 'tenant_id'::text))::uuid))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "document_versions",
+    "policyname": "doc_versions update by tenant",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "((auth.jwt() ? 'tenant_id'::text) AND (tenant_id = ((auth.jwt() ->> 'tenant_id'::text))::uuid))",
+    "with_check": "((auth.jwt() ? 'tenant_id'::text) AND (tenant_id = ((auth.jwt() ->> 'tenant_id'::text))::uuid))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "documents",
+    "policyname": "Access own tenant data",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(tenant_id = get_my_tenant_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "documents",
+    "policyname": "docs insert by tenant",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((auth.jwt() ? 'tenant_id'::text) AND (tenant_id = ((auth.jwt() ->> 'tenant_id'::text))::uuid))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "documents",
+    "policyname": "docs select by tenant",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "((auth.jwt() ? 'tenant_id'::text) AND (tenant_id = ((auth.jwt() ->> 'tenant_id'::text))::uuid))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "documents",
+    "policyname": "docs update by tenant",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "((auth.jwt() ? 'tenant_id'::text) AND (tenant_id = ((auth.jwt() ->> 'tenant_id'::text))::uuid))",
+    "with_check": "((auth.jwt() ? 'tenant_id'::text) AND (tenant_id = ((auth.jwt() ->> 'tenant_id'::text))::uuid))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "policyname": "Admins see tenant profiles",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(tenant_id = get_my_tenant_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "policyname": "Allow Public Insert on Profiles",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "true"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "policyname": "Allow insert profiles on signup",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(auth.uid() = id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "policyname": "Allow select own profile",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(auth.uid() = id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "policyname": "Enable insert for authenticated users only",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "true"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "policyname": "Public Insert Profiles",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "true"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "policyname": "Users can insert their own profile",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(auth.uid() = id)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "profiles",
+    "policyname": "Users can see own profile",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(auth.uid() = id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "sites",
+    "policyname": "Access own tenant data",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(tenant_id = get_my_tenant_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tenants",
+    "policyname": "Allow Public Insert on Tenants",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "true"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tenants",
+    "policyname": "Allow public insert on tenants",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "true"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tenants",
+    "policyname": "Allow public select on tenants",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tenants",
+    "policyname": "Enable insert for public",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "true"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tenants",
+    "policyname": "Public Insert Tenants",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "true"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "tickets",
+    "policyname": "Access own tenant data",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(tenant_id = get_my_tenant_id())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "user_groups",
+    "policyname": "Access own tenant data",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(tenant_id = get_my_tenant_id())",
+    "with_check": null
+  }
+]
+
+
+
+TAREFA
+1) Identifique entidades principais (tabelas) e relações (FKs) e desenhe o ER em texto.
+2) Sugira a arquitetura da aplicação (camadas) e a estrutura de pastas.
+3) Proponha APIs e telas prováveis com base no schema (CRUD + regras).
+4) Gere o código inicial do projeto (conexão Supabase, models, repositories e exemplos de endpoints).
+5) O .env já esta com os dados para acesso ao banco de dados.
+6) Liste perguntas que você PRECISA fazer para confirmar regras de negócio (mas só depois de gerar a primeira versão).
+
