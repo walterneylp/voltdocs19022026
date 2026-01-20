@@ -643,6 +643,24 @@ body {
   gap: 6px;
 }
 
+.pie-view-button {
+  border: 1px solid var(--pie-border);
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 999px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pie-view-icon {
+  width: 14px;
+  height: 14px;
+}
+
 .pie-folder-card ul {
   margin: 0;
   padding-left: 16px;
@@ -679,6 +697,127 @@ body {
 .pie-na-button:disabled {
   opacity: 0.6;
   cursor: wait;
+}
+
+.pie-modal-backdrop,
+.pie-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 40;
+}
+
+.pie-modal,
+.pie-preview {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  width: min(640px, 92vw);
+  max-height: 80vh;
+  overflow: hidden;
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+}
+
+.pie-modal-header,
+.pie-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--pie-border);
+}
+
+.pie-modal-header h3 {
+  margin: 4px 0 0;
+  font-size: 16px;
+}
+
+.pie-modal-header p {
+  margin: 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.pie-modal-header button,
+.pie-preview-header button,
+.pie-modal-actions button {
+  border: none;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.pie-modal-body,
+.pie-preview-body {
+  padding: 16px;
+  overflow: auto;
+}
+
+.pie-modal-error {
+  color: #dc2626;
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+
+.pie-modal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pie-modal-list li {
+  border: 1px solid var(--pie-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pie-modal-list strong {
+  display: block;
+  font-size: 13px;
+}
+
+.pie-modal-list span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.pie-modal-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pie-modal-tag {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.pie-preview-body img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.pie-preview-body iframe {
+  width: 100%;
+  height: 70vh;
+  border: none;
 }
 
 @media (max-width: 1080px) {

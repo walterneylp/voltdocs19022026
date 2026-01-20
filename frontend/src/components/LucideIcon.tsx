@@ -45,7 +45,8 @@ type IconName =
   | "folder"
   | "moon"
   | "sun"
-  | "scan";
+  | "scan"
+  | "eye";
 
 type IconProps = {
   name: IconName;
@@ -144,6 +145,12 @@ const paths: Record<IconName, JSX.Element> = {
       <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
       <path d="M3 17v2a2 2 0 0 0 2 2h2" />
       <path d="M7 12h10" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M2 12s4-7 10-7s10 7 10 7s-4 7-10 7s-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" />
     </>
   ),
   "clipboard-check": (

@@ -6,6 +6,7 @@ import {
   clearToken,
   createDocument,
   deleteDocument,
+  getDocumentVersionUrl,
   getMe,
   listCompanyProfiles,
   listDocumentCategories,
@@ -31,7 +32,7 @@ export function Pie() {
     []
   );
   const [versions, setVersions] = useState<
-    Array<{ document_id: string; valid_until: string | null; created_at: string }>
+    Array<{ id: string; document_id: string; valid_until: string | null; created_at: string }>
   >([]);
   const [documentEquipments, setDocumentEquipments] = useState<
     Array<{ document_id: string; equipment_id: string }>
@@ -60,6 +61,23 @@ export function Pie() {
   >([]);
   const [error, setError] = useState("");
   const [savingNa, setSavingNa] = useState<string | null>(null);
+  const [itemModal, setItemModal] = useState<{
+    code: string;
+    label: string;
+    docs: Array<{
+      id: string;
+      title: string;
+      category: string;
+      valid_until?: string | null;
+      openable: boolean;
+    }>;
+  } | null>(null);
+  const [preview, setPreview] = useState<{
+    name: string;
+    url: string;
+    type: "image" | "pdf" | "audio" | "unknown";
+  } | null>(null);
+  const [modalError, setModalError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -78,6 +96,7 @@ export function Pie() {
         setCategories(cats);
         setVersions(
           versionsList.map((item) => ({
+            id: item.id,
             document_id: item.document_id,
             valid_until: item.valid_until,
             created_at: item.created_at
@@ -113,7 +132,10 @@ export function Pie() {
   }, [categories]);
 
   const latestVersionByDoc = useMemo(() => {
-    const map = new Map<string, { valid_until: string | null; created_at: string }>();
+    const map = new Map<
+      string,
+      { id: string; valid_until: string | null; created_at: string }
+    >();
     versions.forEach((version) => {
       const existing = map.get(version.document_id);
       if (!existing || new Date(version.created_at) > new Date(existing.created_at)) {
@@ -277,6 +299,76 @@ export function Pie() {
     if (["1.2", "1.3", "1.4", "1.5"].includes(itemCode)) return "atendido";
     const hasValid = docsForItem.some((doc) => isDocumentValid(doc.id));
     return hasValid ? "atendido" : "parcial";
+  };
+
+  const getItemDocuments = (itemCode: string) => {
+    if (itemCode === "1.1") {
+      const statusLabel =
+        companyProfileStatus === "atendido"
+          ? "Cadastro completo"
+          : companyProfileStatus === "parcial"
+            ? "Cadastro parcial"
+            : "Cadastro pendente";
+      return [
+        {
+          id: `empresa-${itemCode}`,
+          title: statusLabel,
+          category: "Cadastro da empresa",
+          valid_until: null,
+          openable: false
+        }
+      ];
+    }
+    const categoriesForItem = pieItemCategories[itemCode] ?? [];
+    if (categoriesForItem.length === 0) return [];
+    const docsForItem = documents.filter((doc) => {
+      const key = doc.category_id
+        ? categoryKeyById.get(doc.category_id) ?? normalizeText(doc.category ?? "")
+        : normalizeText(doc.category ?? "");
+      return categoriesForItem.some((cat) => key.includes(normalizeText(cat)));
+    });
+    return docsForItem.map((doc) => ({
+      id: doc.id,
+      title: doc.title,
+      category: doc.category,
+      valid_until: latestVersionByDoc.get(doc.id)?.valid_until ?? null,
+      openable: true
+    }));
+  };
+
+  const detectPreviewType = (url: string) => {
+    const cleanUrl = url.split("?")[0].toLowerCase();
+    if (cleanUrl.endsWith(".pdf")) return "pdf";
+    if (cleanUrl.match(/\.(png|jpg|jpeg|gif|webp)$/)) return "image";
+    if (cleanUrl.match(/\.(mp3|wav|ogg|m4a|webm)$/)) return "audio";
+    return "unknown";
+  };
+
+  const handleOpenItemDocuments = (item: { code: string; label: string }) => {
+    setModalError("");
+    setItemModal({
+      code: item.code,
+      label: item.label,
+      docs: getItemDocuments(item.code)
+    });
+  };
+
+  const handleOpenDocument = async (docId: string, name: string) => {
+    const version = latestVersionByDoc.get(docId);
+    if (!version) {
+      setModalError("Documento sem versão disponível.");
+      return;
+    }
+    try {
+      const response = await getDocumentVersionUrl(version.id);
+      setPreview({
+        name,
+        url: response.url,
+        type: detectPreviewType(response.url)
+      });
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : "Falha ao abrir documento.");
+    }
   };
 
   const pieFolderStatus = (folderCode: string, items: Array<{ code: string }>) => {
@@ -959,6 +1051,14 @@ export function Pie() {
                             <span className={className}>{label}</span>
                             <button
                               type="button"
+                              className="pie-view-button"
+                              aria-label={`Ver documentos do item ${item.code}`}
+                              onClick={() => handleOpenItemDocuments(item)}
+                            >
+                              <LucideIcon name="eye" className="pie-view-icon" />
+                            </button>
+                            <button
+                              type="button"
                               className={`pie-na-button ${isItemNa ? "is-active" : ""}`}
                               onClick={() => toggleNotApplicable(item.code)}
                               disabled={savingNa === item.code}
@@ -974,6 +1074,82 @@ export function Pie() {
               ))}
             </div>
           </div>
+          {itemModal ? (
+            <>
+              <div className="pie-modal-backdrop" />
+              <section className="pie-modal" role="dialog" aria-label="Documentos do item">
+                <header className="pie-modal-header">
+                  <div>
+                    <p>Item {itemModal.code}</p>
+                    <h3>{itemModal.label}</h3>
+                  </div>
+                  <button type="button" onClick={() => setItemModal(null)}>
+                    Fechar
+                  </button>
+                </header>
+                <div className="pie-modal-body">
+                  {modalError ? <p className="pie-modal-error">{modalError}</p> : null}
+                  {itemModal.docs.length === 0 ? (
+                    <p>Nenhum documento vinculado a este item.</p>
+                  ) : (
+                    <ul className="pie-modal-list">
+                      {itemModal.docs.map((doc) => (
+                        <li key={doc.id}>
+                          <div>
+                            <strong>{doc.title}</strong>
+                            <span>{doc.category}</span>
+                          </div>
+                          <div className="pie-modal-actions">
+                            <span className="pie-modal-tag">
+                              Validade: {formatDate(doc.valid_until)}
+                            </span>
+                            {doc.openable ? (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenDocument(doc.id, doc.title)}
+                              >
+                                Abrir
+                              </button>
+                            ) : (
+                              <span className="pie-modal-tag">Sem arquivo</span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </section>
+            </>
+          ) : null}
+          {preview ? (
+            <div className="pie-preview-backdrop">
+              <div className="pie-preview">
+                <div className="pie-preview-header">
+                  <strong>{preview.name}</strong>
+                  <button type="button" onClick={() => setPreview(null)}>
+                    Fechar
+                  </button>
+                </div>
+                <div className="pie-preview-body">
+                  {preview.type === "image" ? (
+                    <img src={preview.url} alt={preview.name} />
+                  ) : null}
+                  {preview.type === "pdf" ? (
+                    <iframe src={preview.url} title={preview.name} />
+                  ) : null}
+                  {preview.type === "audio" ? (
+                    <audio controls src={preview.url} />
+                  ) : null}
+                  {preview.type === "unknown" ? (
+                    <a href={preview.url} target="_blank" rel="noreferrer">
+                      Abrir arquivo
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="pie-checklist">
             <div className="pie-checklist-header">
