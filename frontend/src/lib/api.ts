@@ -635,6 +635,89 @@ export const deleteCompanyProfile = async (id: string) => {
   });
 };
 
+export const getAuditPasta1Config = async () => {
+  return request<{
+    meta: { config_hash: string; config_version: string | null; engine: string | null } | null;
+    items: Array<{
+      item_id: string;
+      pasta: string;
+      categoria: string;
+      nome: string;
+      requisitos_minimos: string[];
+      campos_obrigatorios: string[];
+      evidencias_esperadas: string[];
+      palavras_chave: string[];
+    }>;
+  }>("/audit/pasta1/config");
+};
+
+export const runAuditPasta1 = async () => {
+  return request<{
+    run_id: string;
+    results: Array<{
+      item_id: string;
+      status: string;
+      score_percentual: number;
+      itens_atendidos: string[];
+      itens_faltantes: string[];
+      recomendacoes: string[];
+      trechos_evidencia: string[];
+    }>;
+  }>("/audit/pasta1/run", { method: "POST" });
+};
+
+export const getAuditPasta1Results = async () => {
+  return request<{
+    run: { id: string } | null;
+    results: Array<{
+      item_id: string;
+      status: string;
+      score_percentual: number;
+      itens_atendidos: string[];
+      itens_faltantes: string[];
+      recomendacoes: string[];
+      trechos_evidencia: string[];
+    }>;
+  }>("/audit/pasta1/results");
+};
+
+export const listAuditPasta1Evidences = async (itemId: string) => {
+  return request<
+    Array<{
+      id: string;
+      item_id: string;
+      document_id: string;
+      tipo_evidencia: string | null;
+      observacao: string | null;
+      documents?: { id: string; title: string; category: string } | null;
+    }>
+  >(`/audit/pasta1/evidences?item_id=${encodeURIComponent(itemId)}`);
+};
+
+export const addAuditPasta1Evidence = async (payload: {
+  item_id: string;
+  document_id: string;
+  tipo_evidencia: string;
+  observacao?: string | null;
+}) => {
+  return request<{ id: string }>("/audit/pasta1/evidences", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const deleteAuditPasta1Evidence = async (id: string) => {
+  return request<void>(`/audit/pasta1/evidences?id=${encodeURIComponent(id)}`, {
+    method: "DELETE"
+  });
+};
+
+export const indexAuditPasta1Documents = async () => {
+  return request<{ indexed: number }>("/audit/pasta1/index", {
+    method: "POST"
+  });
+};
+
 export const createUser = async (payload: {
   email: string;
   password: string;
