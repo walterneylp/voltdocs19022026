@@ -1,0 +1,917 @@
+{
+  "version": "2.0-full",
+  "engine": "VoltDocs-AuditAI",
+  "principios": [
+    "Validação objetiva (metadados/validade/assinatura) + auditoria subjetiva (cobertura/coerência)",
+    "IA sugere status; decisão final pode ser humana",
+    "Saída sempre estruturada com lacunas, inconsistências e recomendações"
+  ],
+  "output_esperado_ia": {
+    "status": [
+      "PROVAVELMENTE_ATENDIDO",
+      "PROVAVELMENTE_PARCIAL",
+      "PROVAVELMENTE_PENDENTE",
+      "INCONCLUSIVO"
+    ],
+    "score_percentual": "0-100",
+    "itens_atendidos": [],
+    "itens_faltantes": [],
+    "riscos_identificados": [],
+    "inconsistencias": [],
+    "recomendacoes": [],
+    "trechos_evidencia": []
+  },
+  "regras_globais_cruzadas": [
+    {
+      "id": "G1",
+      "descricao": "Se existe PT (3.4), deve existir APR (3.3) vinculada; e deve haver evidência de LOTO (3.5) quando houver intervenção elétrica/energizada.",
+      "if_any": ["3.4"],
+      "must_have": ["3.3"],
+      "should_have": ["3.5"]
+    },
+    {
+      "id": "G2",
+      "descricao": "Se existem Registros de Alterações (2.6), unifilar (2.1), plantas/roteiros (2.4) e lista de painéis (2.5) devem refletir a atualização.",
+      "if_any": ["2.6"],
+      "must_have": ["2.1", "2.5"],
+      "should_have": ["2.4"]
+    },
+    {
+      "id": "G3",
+      "descricao": "Se existe RTI vigente (9.1), deve existir Plano de Ação (9.3). Ações concluídas devem ter Evidências (9.4).",
+      "if_any": ["9.1"],
+      "must_have": ["9.3"],
+      "should_have": ["9.4"]
+    },
+    {
+      "id": "G4",
+      "descricao": "Se há análise/valores de energia incidente (11.2/12.2), deve existir recomendação de EPI (12.3) e coerência com lista de EPI (5.2) e controle de CA/inspeções (5.4).",
+      "if_any": ["11.2", "12.2"],
+      "should_have": ["12.3", "5.2", "5.4"]
+    },
+    {
+      "id": "G5",
+      "descricao": "Se existe Classificação de Áreas (8.1), deve existir Certificação Ex (8.2) para equipamentos aplicáveis e Integridade Ex (8.3) periódica.",
+      "if_any": ["8.1"],
+      "should_have": ["8.2", "8.3"]
+    },
+    {
+      "id": "G6",
+      "descricao": "Documentos críticos devem ter versão, data, responsável e (quando aplicável) assinatura/ART/RT.",
+      "applies_to_all": true,
+      "checks": ["data", "versao", "responsavel", "assinatura_quando_aplicavel", "art_ou_rt_quando_aplicavel"]
+    }
+  ],
+  "items": [
+    {
+      "item_id": "1.1",
+      "categoria": "DADOS_CADASTRAIS",
+      "nome": "Dados cadastrais",
+      "pasta": "Pasta 1 — Identificação da Empresa",
+      "requisitos_minimos": ["Razão social", "CNPJ", "Endereço", "Unidade/Planta", "Contato institucional", "Atividade/CNAE (quando aplicável)"],
+      "campos_obrigatorios": ["empresa", "cnpj", "endereco", "unidade", "contato"],
+      "evidencias_esperadas": ["Ficha cadastral atualizada", "Documentos institucionais (quando necessário)"],
+      "palavras_chave": ["CNPJ", "razão social", "endereço", "unidade", "CNAE"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "evento", "gatilho": "alteracao_cadastral", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_atualizacao": 30 }
+    },
+    {
+      "item_id": "1.2",
+      "categoria": "ORGANOGRAMA_MANUTENCAO",
+      "nome": "Organograma manutenção/SESMT/CIPA",
+      "pasta": "Pasta 1 — Identificação da Empresa",
+      "requisitos_minimos": ["Estrutura organizacional", "Cargos e nomes", "Linha de reporte", "Responsabilidades básicas", "Data/versão"],
+      "campos_obrigatorios": ["unidade", "data_emissao", "versao"],
+      "evidencias_esperadas": ["Organograma gráfico", "Lista de responsáveis por área (quando aplicável)"],
+      "palavras_chave": ["organograma", "SESMT", "CIPA", "manutenção", "responsável"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 20, "peso_atualizacao": 20 }
+    },
+    {
+      "item_id": "1.3",
+      "categoria": "RESPONSAVEI_INSTALACOES",
+      "nome": "Responsáveis pelas instalações",
+      "pasta": "Pasta 1 — Identificação da Empresa",
+      "requisitos_minimos": ["Nomes e funções", "Atribuições", "Contatos", "Escopo de responsabilidade", "Vigência/designação (quando aplicável)"],
+      "campos_obrigatorios": ["unidade", "responsaveis", "data_emissao"],
+      "evidencias_esperadas": ["Lista nominal", "Termos/designações internas (quando houver)"],
+      "palavras_chave": ["responsáveis", "instalações", "designação", "atribuições", "contato"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_equipes", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_atualizacao": 30 }
+    },
+    {
+      "item_id": "1.4",
+      "categoria": "RESPONSAVEL_TECNICO",
+      "nome": "Responsável Técnico (CREA/ART)",
+      "pasta": "Pasta 1 — Identificação da Empresa",
+      "requisitos_minimos": ["Identificação do RT", "Número CREA", "ART (quando aplicável)", "Escopo", "Vigência", "Assinatura/identificação"],
+      "campos_obrigatorios": ["responsavel_tecnico", "crea", "vigencia"],
+      "evidencias_esperadas": ["ART", "Termo/declaração de responsabilidade técnica (quando aplicável)"],
+      "palavras_chave": ["CREA", "ART", "responsável técnico", "engenheiro", "RT"],
+      "regras_relacionamento": [
+        { "se_existir": "9.1", "deve_existir": "1.4", "mensagem": "RTI exige responsável técnico/ART compatível." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_assinatura": 20, "peso_validade": 30 }
+    },
+    {
+      "item_id": "1.5",
+      "categoria": "CONTATOS_EMERGENCIA",
+      "nome": "Contatos de emergência",
+      "pasta": "Pasta 1 — Identificação da Empresa",
+      "requisitos_minimos": ["Contatos internos", "Contatos externos (bombeiros/SAMU/hospital/concessionária)", "Fluxo/ordem de acionamento (quando aplicável)", "Atualização (data)"],
+      "campos_obrigatorios": ["unidade", "data_emissao", "responsavel"],
+      "evidencias_esperadas": ["Lista atualizada", "Fluxo de comunicação (quando houver)"],
+      "palavras_chave": ["emergência", "bombeiros", "SAMU", "hospital", "concessionária", "plantão"],
+      "regras_relacionamento": [
+        { "se_existir": "10.1", "deve_existir": "1.5", "mensagem": "Procedimentos de emergência devem referenciar contatos atualizados." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 180 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_atualizacao": 40 }
+    },
+
+    {
+      "item_id": "2.1",
+      "categoria": "DIAGRAMA_UNIFILAR",
+      "nome": "Unifilares atualizados (BT/MT)",
+      "pasta": "Pasta 2 — Diagramas e As Built",
+      "requisitos_minimos": ["Identificação da unidade", "Tensão nominal", "Transformadores", "Proteções (disjuntores/fusíveis)", "Barramentos", "Identificação de painéis", "Legenda/simbologia", "Data/versão", "Responsável técnico"],
+      "campos_obrigatorios": ["unidade", "tensao_nominal", "data_emissao", "versao", "responsavel_tecnico"],
+      "evidencias_esperadas": ["Diagrama gráfico", "Pontos de seccionamento", "Interligações de aterramento (quando indicadas)"],
+      "palavras_chave": ["unifilar", "diagrama", "disjuntor", "transformador", "barramento", "BT", "MT", "proteção"],
+      "regras_relacionamento": [
+        { "se_existir": "2.6", "deve_existir": "2.1", "mensagem": "Registros de alterações exigem revisão do unifilar." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "alteracao_instalacao", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_evidencias": 30, "peso_atualizacao": 20 }
+    },
+    {
+      "item_id": "2.2",
+      "categoria": "MEMORIAL_DESCRITIVO",
+      "nome": "Memorial descritivo",
+      "pasta": "Pasta 2 — Diagramas e As Built",
+      "requisitos_minimos": ["Descrição do sistema", "Critérios/premissas", "Materiais/soluções", "Capacidades nominais", "Referências normativas", "Data/versão", "Responsável"],
+      "campos_obrigatorios": ["unidade", "data_emissao", "versao", "responsavel_tecnico"],
+      "evidencias_esperadas": ["Seções técnicas", "Parâmetros/valores nominais", "Lista de normas aplicáveis"],
+      "palavras_chave": ["memorial descritivo", "premissas", "critério", "capacidade", "norma", "especificação"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "evento", "gatilho": "alteracao_projeto", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_atualizacao": 30 }
+    },
+    {
+      "item_id": "2.3",
+      "categoria": "ATERRAMENTO_ESPEC",
+      "nome": "Aterramento (TN/TT/IT)",
+      "pasta": "Pasta 2 — Diagramas e As Built",
+      "requisitos_minimos": ["Esquema TN/TT/IT", "Equipotencialização", "Pontos de conexão", "Condutores/barramentos", "Critérios de proteção", "Data/versão"],
+      "campos_obrigatorios": ["unidade", "esquema", "data_emissao", "versao"],
+      "evidencias_esperadas": ["Diagrama/especificação", "Tabela de condutores/barras (quando aplicável)"],
+      "palavras_chave": ["TN", "TT", "IT", "equipotencial", "barra de terra", "aterramento"],
+      "regras_relacionamento": [
+        { "se_existir": "4.4", "deve_existir": "2.3", "mensagem": "Medições/laudos de aterramento devem ter esquema/especificação de referência." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "alteracao_aterramento", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 20, "peso_atualizacao": 20 }
+    },
+    {
+      "item_id": "2.4",
+      "categoria": "PLANTAS_ELETRICAS",
+      "nome": "Plantas e roteiros",
+      "pasta": "Pasta 2 — Diagramas e As Built",
+      "requisitos_minimos": ["Plantas/rotas", "Infraestrutura (leitos/bandejas/eletrodutos)", "Localização de painéis", "Acessos/roteiro de manutenção (quando aplicável)", "Legenda", "Data/versão"],
+      "campos_obrigatorios": ["unidade", "data_emissao", "versao"],
+      "evidencias_esperadas": ["Plantas", "Roteiros/rotas identificadas", "Legenda/simbologia"],
+      "palavras_chave": ["planta", "layout", "eletroduto", "bandeja", "leito", "rota", "localização"],
+      "regras_relacionamento": [
+        { "se_existir": "2.5", "deve_existir": "2.4", "mensagem": "Lista de painéis deve ser coerente com a localização em plantas/roteiros." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "alteracao_infra", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 20, "peso_atualizacao": 20 }
+    },
+    {
+      "item_id": "2.5",
+      "categoria": "LISTA_PAINEIS",
+      "nome": "Lista de painéis/quadros",
+      "pasta": "Pasta 2 — Diagramas e As Built",
+      "requisitos_minimos": ["Identificação", "Localização", "Tensão/corrente (quando aplicável)", "Função", "Grau de proteção (IP) (quando aplicável)", "Data/versão"],
+      "campos_obrigatorios": ["unidade", "lista_paineis", "data_emissao", "versao"],
+      "evidencias_esperadas": ["Tabela/inventário", "IDs consistentes com unifilar e RTI"],
+      "palavras_chave": ["painel", "quadro", "CCM", "QGBT", "IP", "localização", "tag"],
+      "regras_relacionamento": [
+        { "se_existir": "2.1", "deve_existir": "2.5", "mensagem": "Unifilar deve estar acompanhado de lista consolidada de painéis/quadros." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "alteracao_paineis", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_coerencia": 30 }
+    },
+    {
+      "item_id": "2.6",
+      "categoria": "REGISTRO_ALTERACOES",
+      "nome": "Registros de alterações",
+      "pasta": "Pasta 2 — Diagramas e As Built",
+      "requisitos_minimos": ["Data", "Descrição da mudança", "Motivo", "Responsável", "Impactos", "Evidências/anexos (quando aplicável)"],
+      "campos_obrigatorios": ["unidade", "data", "responsavel", "descricao"],
+      "evidencias_esperadas": ["Log de mudanças", "Anexos (OS/fotos/ART quando aplicável)"],
+      "palavras_chave": ["alteração", "modificação", "revisão", "as built", "adequação", "substituição"],
+      "regras_relacionamento": [
+        { "se_existir": "2.6", "deve_existir": "2.1", "mensagem": "Alterações registradas devem refletir em revisão do unifilar." }
+      ],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+
+    {
+      "item_id": "3.1",
+      "categoria": "POLITICA_SEGURANCA",
+      "nome": "Política de Segurança Elétrica",
+      "pasta": "Pasta 3 — Procedimentos e Instruções",
+      "requisitos_minimos": ["Objetivo", "Escopo", "Responsabilidades", "Diretrizes", "Compromissos", "Aprovação", "Data/versão"],
+      "campos_obrigatorios": ["data_emissao", "versao", "aprovador"],
+      "evidencias_esperadas": ["Documento institucional", "Assinatura/aprovação"],
+      "palavras_chave": ["política", "segurança elétrica", "diretriz", "responsabilidades", "aprovação"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "tempo", "max_dias": 730 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_aprovacao": 30 }
+    },
+    {
+      "item_id": "3.2",
+      "categoria": "PROCEDIMENTO",
+      "nome": "Procedimentos por intervenção",
+      "pasta": "Pasta 3 — Procedimentos e Instruções",
+      "requisitos_minimos": ["Passo a passo", "Riscos e controles", "EPI/EPC", "Ferramentas", "Critérios de liberação", "Responsáveis", "Referências normativas"],
+      "campos_obrigatorios": ["escopo", "responsavel", "versao", "data_emissao"],
+      "evidencias_esperadas": ["Fluxo/etapas", "Checklists", "Responsabilidades"],
+      "palavras_chave": ["procedimento", "instrução", "passo a passo", "verificação", "bloqueio", "teste"],
+      "regras_relacionamento": [
+        { "se_existir": "3.4", "deve_existir": "3.2", "mensagem": "PT deve operar sobre procedimentos por tipo de intervenção." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_processos", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+    {
+      "item_id": "3.3",
+      "categoria": "APR",
+      "nome": "APR (modelos e registros)",
+      "pasta": "Pasta 3 — Procedimentos e Instruções",
+      "requisitos_minimos": ["Descrição da atividade", "Identificação de riscos", "Medidas de controle", "EPI/EPC", "Responsável", "Data", "Assinaturas (quando aplicável)"],
+      "campos_obrigatorios": ["atividade", "riscos", "controles", "responsavel", "data"],
+      "evidencias_esperadas": ["Tabela de riscos", "Lista de EPIs/EPCs", "Assinaturas/ciência"],
+      "palavras_chave": ["APR", "análise preliminar de risco", "perigo", "risco", "controle", "EPI", "EPC"],
+      "regras_relacionamento": [
+        { "se_existir": "3.4", "deve_existir": "3.3", "mensagem": "PT deve estar vinculada a uma APR correspondente." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "nova_intervencao", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_evidencias": 30, "peso_assinaturas": 20 }
+    },
+    {
+      "item_id": "3.4",
+      "categoria": "PT",
+      "nome": "PT (modelos e registros)",
+      "pasta": "Pasta 3 — Procedimentos e Instruções",
+      "requisitos_minimos": ["Descrição do serviço", "Local", "Data/hora", "Equipe", "Riscos", "APR vinculada", "Condições de segurança", "Assinaturas"],
+      "campos_obrigatorios": ["servico", "local", "data", "equipe", "apr_vinculada"],
+      "evidencias_esperadas": ["Checklist de segurança", "Assinaturas", "Vínculo com APR/LOTO quando aplicável"],
+      "palavras_chave": ["PT", "permissão de trabalho", "autorização", "bloqueio", "equipe", "risco"],
+      "regras_relacionamento": [
+        { "se_existir": "3.4", "deve_existir": "3.3", "mensagem": "PT sem APR vinculada." },
+        { "se_existir": "3.4", "deve_existir": "3.5", "mensagem": "PT sem evidência de LOTO quando aplicável." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 1 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 40, "peso_evidencias": 40, "peso_relacionamentos": 20 }
+    },
+    {
+      "item_id": "3.5",
+      "categoria": "LOTO",
+      "nome": "LOTO (procedimento e registros)",
+      "pasta": "Pasta 3 — Procedimentos e Instruções",
+      "requisitos_minimos": ["Objetivo", "Escopo", "Tipos de bloqueio", "Pontos de bloqueio", "Passo a passo", "Verificação de ausência de tensão", "Liberação segura", "Registros de aplicação"],
+      "campos_obrigatorios": ["objetivo", "escopo", "pontos_bloqueio", "passos", "verificacao_tensao"],
+      "evidencias_esperadas": ["Listas/checklists", "Registros de aplicação", "Etiquetas/cadeados", "Critério de liberação"],
+      "palavras_chave": ["LOTO", "bloqueio", "etiquetagem", "cadeado", "ausência de tensão", "seccionamento"],
+      "regras_relacionamento": [
+        { "se_existir": "3.4", "deve_existir": "3.5", "mensagem": "PT deve ter evidência de LOTO quando aplicável." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "nova_intervencao", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_evidencias": 30, "peso_procedimento": 20 }
+    },
+    {
+      "item_id": "3.6",
+      "categoria": "SECCIONAMENTO",
+      "nome": "Seccionamento e delimitação",
+      "pasta": "Pasta 3 — Procedimentos e Instruções",
+      "requisitos_minimos": ["Critérios de seccionamento", "Delimitação de área", "Sinalização", "Controle de acesso (quando aplicável)", "Passos e responsabilidades"],
+      "campos_obrigatorios": ["escopo", "responsavel", "versao", "data_emissao"],
+      "evidencias_esperadas": ["Procedimento", "Modelos de barreiras/zonas (quando aplicável)", "Checklist"],
+      "palavras_chave": ["seccionamento", "delimitação", "zona controlada", "barreira", "isolamento", "sinalização"],
+      "regras_relacionamento": [
+        { "se_existir": "3.5", "deve_existir": "3.6", "mensagem": "LOTO deve estar alinhado a critérios de seccionamento/delimitação." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_layout", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+    {
+      "item_id": "3.7",
+      "categoria": "CONTROLE_ACESSO",
+      "nome": "Controle de acesso e sinalização",
+      "pasta": "Pasta 3 — Procedimentos e Instruções",
+      "requisitos_minimos": ["Critérios de acesso", "Sinalização obrigatória", "Barreiras/controle", "Responsáveis", "Registros (quando aplicável)"],
+      "campos_obrigatorios": ["escopo", "responsavel", "versao", "data_emissao"],
+      "evidencias_esperadas": ["Procedimento", "Modelos de sinalização", "Registros de controle (se aplicável)"],
+      "palavras_chave": ["controle de acesso", "sinalização", "área restrita", "perigo", "alta tensão"],
+      "regras_relacionamento": [
+        { "se_existir": "10.1", "deve_existir": "3.7", "mensagem": "Procedimentos de emergência devem estar coerentes com sinalização/controle de acesso." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 730 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+
+    {
+      "item_id": "4.1",
+      "categoria": "LAUDO_SPDA",
+      "nome": "Projeto/As built SPDA",
+      "pasta": "Pasta 4 — SPDA e Aterramentos",
+      "requisitos_minimos": ["Projeto ou as built", "Componentes (captores/descidas)", "Aterramento do SPDA", "Materiais", "Data/versão", "Responsável técnico"],
+      "campos_obrigatorios": ["unidade", "data_emissao", "versao", "responsavel_tecnico"],
+      "evidencias_esperadas": ["Desenhos/plantas SPDA", "Memorial/critério (quando houver)", "ART (quando aplicável)"],
+      "palavras_chave": ["SPDA", "para-raios", "captores", "descida", "aterramento", "NBR 5419"],
+      "regras_relacionamento": [
+        { "se_existir": "4.2", "deve_existir": "4.1", "mensagem": "Inspeções/laudos devem referenciar projeto/as built do SPDA." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "alteracao_spda", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+    {
+      "item_id": "4.2",
+      "categoria": "LAUDO_SPDA",
+      "nome": "Laudos/inspeções periódicas",
+      "pasta": "Pasta 4 — SPDA e Aterramentos",
+      "requisitos_minimos": ["Escopo/método", "Resultados", "Não conformidades", "Recomendações", "Data", "Assinatura/RT"],
+      "campos_obrigatorios": ["data", "responsavel_tecnico", "assinatura"],
+      "evidencias_esperadas": ["Relatório", "Registros fotográficos (quando aplicável)", "Lista de não conformidades (quando houver)"],
+      "palavras_chave": ["laudo", "inspeção", "SPDA", "não conformidade", "recomendação", "periodicidade"],
+      "regras_relacionamento": [
+        { "se_existir": "4.2", "deve_existir": "4.5", "mensagem": "Não conformidades em laudo devem gerar registro de correções." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_assinatura": 20, "peso_validade": 30 }
+    },
+    {
+      "item_id": "4.3",
+      "categoria": "LAUDO_ATERRAMENTO",
+      "nome": "Medições de continuidade",
+      "pasta": "Pasta 4 — SPDA e Aterramentos",
+      "requisitos_minimos": ["Pontos medidos", "Método", "Resultados", "Critério de aceitação", "Data", "Responsável"],
+      "campos_obrigatorios": ["data", "pontos", "resultados", "responsavel"],
+      "evidencias_esperadas": ["Planilha/relatório de medição", "Instrumento/metodologia citada"],
+      "palavras_chave": ["continuidade", "equipotencial", "medição", "ohm", "teste"],
+      "regras_relacionamento": [
+        { "se_existir": "4.3", "deve_existir": "2.3", "mensagem": "Medições devem estar coerentes com o esquema/especificação de aterramento." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_validade": 30 }
+    },
+    {
+      "item_id": "4.4",
+      "categoria": "LAUDO_ATERRAMENTO",
+      "nome": "Resistência de aterramento",
+      "pasta": "Pasta 4 — SPDA e Aterramentos",
+      "requisitos_minimos": ["Método de medição", "Resultados", "Critério/limites", "Pontos/locais", "Data", "Responsável"],
+      "campos_obrigatorios": ["data", "resultados", "metodo", "responsavel"],
+      "evidencias_esperadas": ["Relatório de resistência", "Anexos de campo (quando houver)"],
+      "palavras_chave": ["resistência de aterramento", "ohm", "terrômetro", "queda de potencial", "método"],
+      "regras_relacionamento": [
+        { "se_existir": "4.4", "deve_existir": "4.5", "mensagem": "Resultados fora do critério devem ter correções registradas." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_validade": 40 }
+    },
+    {
+      "item_id": "4.5",
+      "categoria": "REGISTRO_CORRECOES",
+      "nome": "Registros de correções",
+      "pasta": "Pasta 4 — SPDA e Aterramentos",
+      "requisitos_minimos": ["Ação corretiva", "Data", "Responsável", "Evidências", "Vínculo com laudo/inspeção"],
+      "campos_obrigatorios": ["data", "responsavel", "descricao", "evidencias"],
+      "evidencias_esperadas": ["Fotos/OS", "Reinspeção (quando aplicável)", "Termo de aceite (quando houver)"],
+      "palavras_chave": ["correção", "adequação", "reparo", "substituição", "reinspeção"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+
+    {
+      "item_id": "5.1",
+      "categoria": "EPC",
+      "nome": "Lista de EPC por área",
+      "pasta": "Pasta 5 — EPC, EPI e Ferramental",
+      "requisitos_minimos": ["EPC por setor/área", "Finalidade", "Localização", "Critério de inspeção (quando aplicável)", "Responsável"],
+      "campos_obrigatorios": ["unidade", "setor", "lista_epc", "data_emissao"],
+      "evidencias_esperadas": ["Inventário/tabela", "Registro de inspeção (quando existir)"],
+      "palavras_chave": ["EPC", "tapete isolante", "barreira", "sinalização", "proteção coletiva"],
+      "regras_relacionamento": [
+        { "se_existir": "11.3", "deve_existir": "5.1", "mensagem": "Níveis de risco por área devem refletir EPC disponível por área." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_validade": 30 }
+    },
+    {
+      "item_id": "5.2",
+      "categoria": "EPI",
+      "nome": "Lista de EPI por atividade",
+      "pasta": "Pasta 5 — EPC, EPI e Ferramental",
+      "requisitos_minimos": ["EPI por atividade", "Critérios de uso", "CA (quando aplicável)", "Risco associado", "Atualização"],
+      "campos_obrigatorios": ["atividade", "lista_epi", "data_emissao"],
+      "evidencias_esperadas": ["Tabela de EPI", "Correlação com APR/energia incidente (quando aplicável)"],
+      "palavras_chave": ["EPI", "luva", "viseira", "capacete", "CA", "proteção", "arco"],
+      "regras_relacionamento": [
+        { "se_existir": "12.3", "deve_existir": "5.2", "mensagem": "EPI recomendado por energia incidente deve refletir na lista por atividade." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_coerencia": 40 }
+    },
+    {
+      "item_id": "5.3",
+      "categoria": "FERRAMENTAL_ISOLADO",
+      "nome": "Ferramental isolado",
+      "pasta": "Pasta 5 — EPC, EPI e Ferramental",
+      "requisitos_minimos": ["Inventário", "Classe/isolação (quando aplicável)", "Identificação", "Conservação", "Ensaios/inspeções (quando aplicável)"],
+      "campos_obrigatorios": ["lista_ferramental", "data_emissao", "responsavel"],
+      "evidencias_esperadas": ["Lista", "Certificados/ensaios (quando houver)"],
+      "palavras_chave": ["ferramenta isolada", "1000V", "classe", "isolação", "ensaio"],
+      "regras_relacionamento": [
+        { "se_existir": "7.1", "deve_existir": "5.3", "mensagem": "Ensaios dielétricos devem se conectar ao inventário de itens." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_validade": 30 }
+    },
+    {
+      "item_id": "5.4",
+      "categoria": "INSPECAO_EPI_EPC",
+      "nome": "Validade/CA e inspeções",
+      "pasta": "Pasta 5 — EPC, EPI e Ferramental",
+      "requisitos_minimos": ["Controle de CA (quando aplicável)", "Validades", "Registros de inspeção", "Critérios de descarte/substituição", "Responsável"],
+      "campos_obrigatorios": ["data", "responsavel", "registros"],
+      "evidencias_esperadas": ["Planilha/sistema", "Registros por item (quando aplicável)"],
+      "palavras_chave": ["CA", "validade", "inspeção", "descarte", "substituição"],
+      "regras_relacionamento": [
+        { "se_existir": "5.2", "deve_existir": "5.4", "mensagem": "Lista de EPI deve ter controle de CA/validade/inspeções." }
+      ],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+
+    {
+      "item_id": "6.1",
+      "categoria": "MATRIZ_COMPETENCIAS",
+      "nome": "Matriz de competências",
+      "pasta": "Pasta 6 — Treinamentos e Autorizações",
+      "requisitos_minimos": ["Funções", "Competências exigidas", "Treinamentos", "Reciclagens/validades", "Critérios de autorização"],
+      "campos_obrigatorios": ["unidade", "funcoes", "treinamentos", "data_emissao"],
+      "evidencias_esperadas": ["Tabela de matriz", "Regras de manutenção/reciclagem"],
+      "palavras_chave": ["matriz de competências", "treinamento", "reciclagem", "autorização", "habilitação"],
+      "regras_relacionamento": [
+        { "se_existir": "6.2", "deve_existir": "6.1", "mensagem": "Lista de autorizados deve ter critério (matriz) definido." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_validade": 30 }
+    },
+    {
+      "item_id": "6.2",
+      "categoria": "AUTORIZADOS",
+      "nome": "Lista de autorizados",
+      "pasta": "Pasta 6 — Treinamentos e Autorizações",
+      "requisitos_minimos": ["Lista nominal", "Escopo de autorização", "Data", "Aprovação/responsável", "Vínculo com treinamentos"],
+      "campos_obrigatorios": ["unidade", "lista_autorizados", "data", "aprovador"],
+      "evidencias_esperadas": ["Lista", "Termos/designações (quando aplicável)"],
+      "palavras_chave": ["autorizado", "habilitado", "qualificado", "designação", "escopo"],
+      "regras_relacionamento": [
+        { "se_existir": "6.2", "deve_existir": "6.3", "mensagem": "Autorizados devem ter certificados NR-10/SEP compatíveis." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_pessoal", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_coerencia": 40 }
+    },
+    {
+      "item_id": "6.3",
+      "categoria": "TREINAMENTO_NR10",
+      "nome": "Certificados NR-10/SEP",
+      "pasta": "Pasta 6 — Treinamentos e Autorizações",
+      "requisitos_minimos": ["Certificados", "Carga horária", "Conteúdo/programa", "Datas", "Validade/reciclagem (quando aplicável)", "Instituição/instrutor"],
+      "campos_obrigatorios": ["pessoas", "datas", "carga_horaria", "validade"],
+      "evidencias_esperadas": ["Certificados", "Listas de presença (quando houver)"],
+      "palavras_chave": ["NR-10", "SEP", "certificado", "capacitação", "reciclagem", "carga horária"],
+      "regras_relacionamento": [
+        { "se_existir": "6.2", "deve_existir": "6.3", "mensagem": "Lista de autorizados deve estar coberta por certificados válidos." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 730 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_validade": 50 }
+    },
+    {
+      "item_id": "6.4",
+      "categoria": "INTEGRACAO_TERCEIROS",
+      "nome": "Integração de terceiros",
+      "pasta": "Pasta 6 — Treinamentos e Autorizações",
+      "requisitos_minimos": ["Procedimento de integração", "Regras de acesso", "Treinamentos aplicáveis", "Registros/assinaturas", "Vigência"],
+      "campos_obrigatorios": ["data", "responsavel", "registros"],
+      "evidencias_esperadas": ["Listas assinadas", "Termos de ciência", "Regras de acesso/sinalização aplicáveis"],
+      "palavras_chave": ["integração", "terceiros", "prestador", "NR-10", "acesso", "ciência"],
+      "regras_relacionamento": [
+        { "se_existir": "3.7", "deve_existir": "6.4", "mensagem": "Controle de acesso deve estar alinhado com integração de terceiros." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "novo_terceiro", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+
+    {
+      "item_id": "7.1",
+      "categoria": "ENSAIO_DIELETRICO",
+      "nome": "Ensaios dielétricos",
+      "pasta": "Pasta 7 — Ensaios EPC/EPI",
+      "requisitos_minimos": ["Itens ensaiados", "Método", "Resultados", "Critério de aceitação", "Data", "Responsável/laboratório"],
+      "campos_obrigatorios": ["data", "itens", "resultados", "responsavel"],
+      "evidencias_esperadas": ["Relatórios de ensaio", "Certificados do laboratório (quando aplicável)"],
+      "palavras_chave": ["ensaio dielétrico", "isolação", "kV", "aceitação", "laboratório", "relatório"],
+      "regras_relacionamento": [
+        { "se_existir": "7.1", "deve_existir": "7.3", "mensagem": "Ensaios devem estar conectados a rastreabilidade dos itens." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_validade": 40 }
+    },
+    {
+      "item_id": "7.2",
+      "categoria": "INSPECAO_EPI_EPC",
+      "nome": "Inspeção e descarte",
+      "pasta": "Pasta 7 — Ensaios EPC/EPI",
+      "requisitos_minimos": ["Critérios de inspeção", "Registros", "Critérios de descarte", "Substituição", "Responsável"],
+      "campos_obrigatorios": ["registros", "responsavel", "data"],
+      "evidencias_esperadas": ["Checklists", "Registros de descarte/substituição"],
+      "palavras_chave": ["inspeção", "descarte", "substituição", "conformidade", "EPI", "EPC"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+    {
+      "item_id": "7.3",
+      "categoria": "RASTREABILIDADE_EPI_EPC",
+      "nome": "Rastreabilidade",
+      "pasta": "Pasta 7 — Ensaios EPC/EPI",
+      "requisitos_minimos": ["Identificação única", "Histórico (aquisição→uso→inspeções/ensaios→descarte)", "Vínculo com ensaios/inspeções", "Responsável"],
+      "campos_obrigatorios": ["sistema_rastreio", "responsavel"],
+      "evidencias_esperadas": ["Planilha/sistema", "Logs/histórico por item"],
+      "palavras_chave": ["rastreabilidade", "serial", "lote", "histórico", "controle", "registro"],
+      "regras_relacionamento": [
+        { "se_existir": "7.1", "deve_existir": "7.3", "mensagem": "Ensaios exigem rastreabilidade para comprovar quais itens foram ensaiados." }
+      ],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+
+    {
+      "item_id": "8.1",
+      "categoria": "AREAS_CLASSIFICADAS",
+      "nome": "Classificação de áreas",
+      "pasta": "Pasta 8 — Áreas Classificadas",
+      "requisitos_minimos": ["Mapa/zonas", "Critérios", "Substâncias/ambientes", "Documentação técnica", "Data/versão", "Responsável técnico (quando aplicável)"],
+      "campos_obrigatorios": ["unidade", "data_emissao", "versao"],
+      "evidencias_esperadas": ["Relatório/planta de classificação", "Tabela de zonas/áreas"],
+      "palavras_chave": ["área classificada", "zona", "atmosfera explosiva", "poeira", "gás", "classificação"],
+      "regras_relacionamento": [
+        { "se_existir": "8.1", "deve_existir": "8.2", "mensagem": "Classificação de áreas deve suportar certificação Ex dos equipamentos aplicáveis." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_processo_produtivo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+    {
+      "item_id": "8.2",
+      "categoria": "CERTIFICACAO_EX",
+      "nome": "Certificação Ex",
+      "pasta": "Pasta 8 — Áreas Classificadas",
+      "requisitos_minimos": ["Certificados", "Equipamentos/IDs", "Zona aplicável", "Validade", "Normas/organismo certificador"],
+      "campos_obrigatorios": ["equipamentos", "certificados", "validade"],
+      "evidencias_esperadas": ["Certificados Ex", "Placas/dados de identificação dos equipamentos"],
+      "palavras_chave": ["Ex", "ATEX", "IECEx", "certificação", "zona", "proteção"],
+      "regras_relacionamento": [
+        { "se_existir": "8.2", "deve_existir": "8.3", "mensagem": "Equipamentos Ex exigem registros de integridade/inspeções." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 730 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_validade": 40 }
+    },
+    {
+      "item_id": "8.3",
+      "categoria": "INTEGRIDADE_EX",
+      "nome": "Registros de integridade",
+      "pasta": "Pasta 8 — Áreas Classificadas",
+      "requisitos_minimos": ["Inspeções", "Manutenções", "Não conformidades", "Correções", "Periodicidade", "Responsável"],
+      "campos_obrigatorios": ["periodicidade", "registros", "responsavel"],
+      "evidencias_esperadas": ["Relatórios", "Checklists de inspeção Ex", "Planos de correção (quando aplicável)"],
+      "palavras_chave": ["integridade Ex", "inspeção", "não conformidade", "correção", "periodicidade"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_validade": 40 }
+    },
+
+    {
+      "item_id": "9.1",
+      "categoria": "RTI",
+      "nome": "RTI vigente",
+      "pasta": "Pasta 9 — RTI e Plano de Ação",
+      "requisitos_minimos": ["Escopo", "Lista de painéis/itens inspecionados", "Não conformidades", "Classificação de risco", "Recomendações", "Conclusão", "Data", "Assinatura/RT", "ART vinculada (quando aplicável)"],
+      "campos_obrigatorios": ["escopo", "data", "responsavel_tecnico", "assinatura"],
+      "evidencias_esperadas": ["Tabela de não conformidades", "Registro fotográfico (quando aplicável)", "Referência ao plano de ação"],
+      "palavras_chave": ["RTI", "relatório técnico", "inspeção", "não conformidade", "risco", "recomendação", "NR-10"],
+      "regras_relacionamento": [
+        { "se_existir": "9.1", "deve_existir": "9.3", "mensagem": "RTI exige plano de ação consolidado." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 40, "peso_evidencias": 40, "peso_assinatura": 20 }
+    },
+    {
+      "item_id": "9.2",
+      "categoria": "HISTORICO_RTI",
+      "nome": "Histórico de RTIs",
+      "pasta": "Pasta 9 — RTI e Plano de Ação",
+      "requisitos_minimos": ["Arquivamento organizado", "Datas", "Versões", "Rastreabilidade por unidade", "Acesso aos RTIs anteriores"],
+      "campos_obrigatorios": ["lista_rtis", "unidade"],
+      "evidencias_esperadas": ["Índice/lista", "RTIs anteriores anexados"],
+      "palavras_chave": ["histórico", "RTI anterior", "versão", "revisão", "arquivo"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+    {
+      "item_id": "9.3",
+      "categoria": "PLANO_ACAO",
+      "nome": "Plano de ação consolidado",
+      "pasta": "Pasta 9 — RTI e Plano de Ação",
+      "requisitos_minimos": ["Não conformidade", "Ação", "Responsável", "Prazo", "Prioridade", "Status", "Evidência esperada"],
+      "campos_obrigatorios": ["lista_acoes", "responsaveis", "prazos"],
+      "evidencias_esperadas": ["Tabela/planilha", "Relação com itens do RTI"],
+      "palavras_chave": ["plano de ação", "prazo", "responsável", "prioridade", "status", "encerramento"],
+      "regras_relacionamento": [
+        { "se_existir": "9.3", "deve_existir": "9.4", "mensagem": "Ações concluídas devem ter evidências de encerramento anexadas." }
+      ],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+    {
+      "item_id": "9.4",
+      "categoria": "EVIDENCIA_ENCERRAMENTO",
+      "nome": "Evidências de encerramento",
+      "pasta": "Pasta 9 — RTI e Plano de Ação",
+      "requisitos_minimos": ["Evidência por ação", "Data", "Responsável", "Antes/depois (quando aplicável)", "Reinspeção/validação (quando aplicável)"],
+      "campos_obrigatorios": ["acao_vinculada", "data", "responsavel", "evidencias"],
+      "evidencias_esperadas": ["Fotos", "Laudos", "OS", "Termos de aceite/validação"],
+      "palavras_chave": ["evidência", "encerramento", "concluído", "antes e depois", "validação", "reinspeção"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+
+    {
+      "item_id": "10.1",
+      "categoria": "EMERGENCIA",
+      "nome": "Procedimentos de emergência",
+      "pasta": "Pasta 10 — SEP e Emergências",
+      "requisitos_minimos": ["Cenários", "Ações imediatas", "Isolamento", "Comunicação", "Primeiros socorros (quando aplicável)", "Responsáveis", "Referência a contatos de emergência"],
+      "campos_obrigatorios": ["escopo", "responsavel", "versao", "data_emissao"],
+      "evidencias_esperadas": ["Procedimentos", "Fluxos", "Checklists", "Pontos de acionamento"],
+      "palavras_chave": ["emergência", "choque elétrico", "incêndio", "arco elétrico", "isolamento", "evacuação"],
+      "regras_relacionamento": [
+        { "se_existir": "10.1", "deve_existir": "1.5", "mensagem": "Procedimentos de emergência devem ter contatos atualizados." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 730 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_coerencia": 30 }
+    },
+    {
+      "item_id": "10.2",
+      "categoria": "CERTIFICACAO_SEP",
+      "nome": "Certificações adicionais",
+      "pasta": "Pasta 10 — SEP e Emergências",
+      "requisitos_minimos": ["Certificações aplicáveis", "Pessoas cobertas", "Escopo", "Validade", "Evidências"],
+      "campos_obrigatorios": ["pessoas", "validade", "certificados"],
+      "evidencias_esperadas": ["Certificados", "Registros de qualificação"],
+      "palavras_chave": ["SEP", "certificação", "alta tensão", "capacitação", "qualificação"],
+      "regras_relacionamento": [
+        { "se_existir": "10.2", "deve_existir": "6.2", "mensagem": "Certificações SEP devem se relacionar com lista de autorizados." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 730 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_validade": 50 }
+    },
+    {
+      "item_id": "10.3",
+      "categoria": "SIMULADOS",
+      "nome": "Simulados e registros",
+      "pasta": "Pasta 10 — SEP e Emergências",
+      "requisitos_minimos": ["Plano do simulado", "Data", "Participantes", "Resultados", "Lições aprendidas", "Ações corretivas (quando aplicável)"],
+      "campos_obrigatorios": ["datas", "participantes", "relatorios"],
+      "evidencias_esperadas": ["Ata/relatório", "Lista de presença", "Registros (fotos) quando aplicável"],
+      "palavras_chave": ["simulado", "exercício", "emergência", "lições aprendidas", "ata"],
+      "regras_relacionamento": [
+        { "se_existir": "10.3", "deve_existir": "10.1", "mensagem": "Simulados devem se basear em procedimentos de emergência documentados." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_validade": 40 }
+    },
+
+    {
+      "item_id": "11.1",
+      "categoria": "INVENTARIO_RISCO_ELETRICO",
+      "nome": "Tensões e correntes de curto",
+      "pasta": "Pasta 11 — Inventário de Riscos Elétricos",
+      "requisitos_minimos": ["Tensões por painel/ponto", "Correntes de curto (Icc)", "Método de cálculo/medição", "Data/referência", "Responsável"],
+      "campos_obrigatorios": ["paineis", "tensoes", "curto", "data_referencia"],
+      "evidencias_esperadas": ["Tabela por painel", "Memória de cálculo (quando aplicável)"],
+      "palavras_chave": ["curto-circuito", "Icc", "tensão", "kA", "painel", "capacidade de interrupção"],
+      "regras_relacionamento": [
+        { "se_existir": "12.2", "deve_existir": "11.1", "mensagem": "Energia incidente depende de base de tensões e curto-circuito documentada." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_sistema_eletrico", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+    {
+      "item_id": "11.2",
+      "categoria": "ENERGIA_INCIDENTE",
+      "nome": "Energia incidente (arco)",
+      "pasta": "Pasta 11 — Inventário de Riscos Elétricos",
+      "requisitos_minimos": ["Metodologia", "Parâmetros", "Resultados por painel/ponto", "Data/referência", "Responsável técnico"],
+      "campos_obrigatorios": ["metodologia", "resultados", "data_referencia", "responsavel_tecnico"],
+      "evidencias_esperadas": ["Relatório/tabela", "Parâmetros do sistema", "Premissas"],
+      "palavras_chave": ["energia incidente", "arco elétrico", "cal/cm²", "arc flash", "metodologia"],
+      "regras_relacionamento": [
+        { "se_existir": "11.2", "deve_existir": "12.3", "mensagem": "Energia incidente deve resultar em recomendação de EPI." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_parametros_curto", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+    {
+      "item_id": "11.3",
+      "categoria": "INVENTARIO_RISCO_ELETRICO",
+      "nome": "Níveis de risco por área",
+      "pasta": "Pasta 11 — Inventário de Riscos Elétricos",
+      "requisitos_minimos": ["Tabela/mapa por área", "Critérios de classificação", "Controles recomendados", "Data/versão"],
+      "campos_obrigatorios": ["areas", "niveis", "criterios", "data_emissao"],
+      "evidencias_esperadas": ["Tabela", "Mapa/identificação de áreas (quando aplicável)"],
+      "palavras_chave": ["nível de risco", "classificação", "área", "controle", "zona", "exposição"],
+      "regras_relacionamento": [
+        { "se_existir": "11.3", "deve_existir": "5.1", "mensagem": "Risco por área deve refletir EPC por área." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_layout", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+
+    {
+      "item_id": "12.1",
+      "categoria": "ENERGIA_INCIDENTE",
+      "nome": "Categoria por painel (BT/MT)",
+      "pasta": "Pasta 12 — Análise de Energia Incidente",
+      "requisitos_minimos": ["Categoria por painel", "Critérios usados", "Vínculo com cal/cm²", "Data/referência"],
+      "campos_obrigatorios": ["paineis", "categorias", "criterios", "data_referencia"],
+      "evidencias_esperadas": ["Tabela por painel", "Critérios/metodologia"],
+      "palavras_chave": ["categoria", "painel", "energia incidente", "arc flash", "BT", "MT"],
+      "regras_relacionamento": [
+        { "se_existir": "12.1", "deve_existir": "12.2", "mensagem": "Categoria deve ser sustentada por valores de cal/cm²." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_parametros_curto", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_coerencia": 30 }
+    },
+    {
+      "item_id": "12.2",
+      "categoria": "ENERGIA_INCIDENTE",
+      "nome": "cal/cm² por painel",
+      "pasta": "Pasta 12 — Análise de Energia Incidente",
+      "requisitos_minimos": ["Valores por painel", "Parâmetros", "Metodologia", "Data/referência", "Responsável técnico"],
+      "campos_obrigatorios": ["paineis", "valores", "metodologia", "data_referencia"],
+      "evidencias_esperadas": ["Tabela", "Relatório de cálculo", "Premissas"],
+      "palavras_chave": ["cal/cm²", "energia incidente", "arc flash", "painel", "cálculo"],
+      "regras_relacionamento": [
+        { "se_existir": "12.2", "deve_existir": "12.3", "mensagem": "Valores de cal/cm² devem gerar EPI recomendado." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_sistema_eletrico", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 60, "peso_evidencias": 40 }
+    },
+    {
+      "item_id": "12.3",
+      "categoria": "EPI",
+      "nome": "EPI recomendado",
+      "pasta": "Pasta 12 — Análise de Energia Incidente",
+      "requisitos_minimos": ["EPI por nível/categoria", "Critérios", "Compatibilidade com cal/cm²", "Atualização", "Relação com atividades (quando aplicável)"],
+      "campos_obrigatorios": ["tabela_recomendacao", "criterios", "data_emissao"],
+      "evidencias_esperadas": ["Tabela de recomendação", "Vínculo com lista de EPI por atividade"],
+      "palavras_chave": ["EPI recomendado", "cal/cm²", "categoria", "arco elétrico", "proteção"],
+      "regras_relacionamento": [
+        { "se_existir": "12.3", "deve_existir": "5.4", "mensagem": "EPI recomendado deve estar coberto por controle de CA/validade/inspeções." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_parametros_analise", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_coerencia": 30 }
+    },
+
+    {
+      "item_id": "13.1",
+      "categoria": "CRONOGRAMA_INSPECOES",
+      "nome": "Frequências de inspeção",
+      "pasta": "Pasta 13 — Cronograma Mestre de Inspeções",
+      "requisitos_minimos": ["Itens inspecionáveis", "Periodicidades", "Critérios", "Base normativa", "Responsáveis (referenciados)"],
+      "campos_obrigatorios": ["itens", "frequencias", "data_emissao", "versao"],
+      "evidencias_esperadas": ["Cronograma/tabela", "Regras de disparo"],
+      "palavras_chave": ["cronograma", "frequência", "inspeção", "periodicidade", "plano"],
+      "regras_relacionamento": [
+        { "se_existir": "13.1", "deve_existir": "13.2", "mensagem": "Cronograma deve definir responsáveis." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_validade": 30 }
+    },
+    {
+      "item_id": "13.2",
+      "categoria": "CRONOGRAMA_INSPECOES",
+      "nome": "Responsáveis",
+      "pasta": "Pasta 13 — Cronograma Mestre de Inspeções",
+      "requisitos_minimos": ["Responsável por item/atividade", "Substitutos (quando aplicável)", "Critérios mínimos de competência", "Contatos (quando aplicável)"],
+      "campos_obrigatorios": ["responsaveis", "itens"],
+      "evidencias_esperadas": ["Tabela de atribuições", "Vínculo com matriz de competências (quando aplicável)"],
+      "palavras_chave": ["responsável", "atribuição", "inspeção", "competência", "escala"],
+      "regras_relacionamento": [
+        { "se_existir": "13.2", "deve_existir": "6.1", "mensagem": "Responsáveis devem ser coerentes com matriz de competências." }
+      ],
+      "validade": { "tipo": "evento", "gatilho": "mudanca_equipes", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_coerencia": 30 }
+    },
+    {
+      "item_id": "13.3",
+      "categoria": "CRONOGRAMA_INSPECOES",
+      "nome": "Base normativa",
+      "pasta": "Pasta 13 — Cronograma Mestre de Inspeções",
+      "requisitos_minimos": ["Normas citadas", "Relação norma→item", "Critérios mínimos por norma", "Data/versão"],
+      "campos_obrigatorios": ["normas", "mapeamento_itens_normas", "data_emissao"],
+      "evidencias_esperadas": ["Seção normativa", "Lista de normas aplicáveis"],
+      "palavras_chave": ["norma", "NR-10", "NBR", "critério", "requisito", "periodicidade"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "tempo", "max_dias": 730 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 80, "peso_atualizacao": 20 }
+    },
+
+    {
+      "item_id": "14.1",
+      "categoria": "PIE_STATUS",
+      "nome": "Versão e data",
+      "pasta": "Pasta 14 — Controle de Revisões do PIE",
+      "requisitos_minimos": ["Versão do PIE", "Data de emissão", "Histórico de versões", "Vigência"],
+      "campos_obrigatorios": ["versao", "data_emissao", "vigencia"],
+      "evidencias_esperadas": ["Registro de versão", "Controle documental"],
+      "palavras_chave": ["versão", "revisão", "data de emissão", "vigência", "controle documental"],
+      "regras_relacionamento": [
+        { "se_existir": "14.1", "deve_existir": "14.2", "mensagem": "Versão registrada deve ter motivo de revisão." }
+      ],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+    {
+      "item_id": "14.2",
+      "categoria": "REVISAO_PIE",
+      "nome": "Motivo da revisão",
+      "pasta": "Pasta 14 — Controle de Revisões do PIE",
+      "requisitos_minimos": ["Motivo", "Itens impactados", "Data", "Responsável", "Aprovação (quando aplicável)"],
+      "campos_obrigatorios": ["motivo", "data", "responsavel"],
+      "evidencias_esperadas": ["Registro textual", "Vínculo com alterações (2.6) quando aplicável"],
+      "palavras_chave": ["motivo", "revisão", "alteração", "atualização", "impacto"],
+      "regras_relacionamento": [
+        { "se_existir": "2.6", "deve_existir": "14.2", "mensagem": "Alterações técnicas relevantes devem constar como motivo/escopo de revisão do PIE." }
+      ],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 70, "peso_evidencias": 30 }
+    },
+    {
+      "item_id": "14.3",
+      "categoria": "RESPONSAVEL_TECNICO",
+      "nome": "Responsável técnico",
+      "pasta": "Pasta 14 — Controle de Revisões do PIE",
+      "requisitos_minimos": ["Identificação do RT", "CREA", "Assinatura", "Vínculo com ART (quando aplicável)"],
+      "campos_obrigatorios": ["responsavel_tecnico", "crea", "assinatura"],
+      "evidencias_esperadas": ["Assinatura/identificação", "Referência à ART"],
+      "palavras_chave": ["responsável técnico", "CREA", "ART", "assinatura", "revisão"],
+      "regras_relacionamento": [
+        { "se_existir": "14.3", "deve_existir": "1.4", "mensagem": "Controle de revisão deve estar coerente com RT/ART vigentes na Pasta 1." }
+      ],
+      "validade": { "tipo": "tempo", "max_dias": 365 },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_assinatura": 20, "peso_validade": 30 }
+    },
+
+    {
+      "item_id": "PIE-PLACEHOLDER-01",
+      "categoria": "PIE_STATUS",
+      "nome": "Status PIE (operacional)",
+      "pasta": "Sistema/Operacional",
+      "requisitos_minimos": ["Status global por pasta e item", "Cálculo por evidências", "Histórico de auditorias", "Rastreabilidade de decisões humanas"],
+      "campos_obrigatorios": ["status_por_item", "ultima_auditoria", "responsavel_validacao"],
+      "evidencias_esperadas": ["Logs de auditoria", "Justificativas quando houver override humano"],
+      "palavras_chave": ["status", "auditoria", "conformidade", "override", "validação"],
+      "regras_relacionamento": [],
+      "validade": { "tipo": "continuo", "max_dias": null },
+      "scoring": { "peso_total": 100, "peso_requisitos": 50, "peso_rastreabilidade": 50 }
+    }
+  ],
+  "schema_notes": {
+    "observacao": "Os itens 1.1–14.3 totalizam 56 itens do PIE. O objeto PIE-PLACEHOLDER-01 é opcional (camada operacional do VoltDocs) e pode ser removido se você quiser manter estritamente só os 56 itens normativos.",
+    "total_itens_pie": 56
+  }
+}
