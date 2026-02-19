@@ -14,6 +14,7 @@ import {
 
 export function Dashboard() {
   const authUser = getAuthUser();
+  const appVersion = import.meta.env.VITE_APP_VERSION ?? "";
   const [assetsTotal, setAssetsTotal] = useState(0);
   const [expiredDocs, setExpiredDocs] = useState(0);
   const [openTickets, setOpenTickets] = useState(0);
@@ -86,6 +87,7 @@ export function Dashboard() {
         <div className="sidebar-brand">
           <div className="sidebar-logo" aria-hidden="true" />
           <span className="sidebar-title">VoltDocs</span>
+          {appVersion ? <span className="sidebar-version">v{appVersion}</span> : null}
         </div>
 
         <nav className="sidebar-nav">

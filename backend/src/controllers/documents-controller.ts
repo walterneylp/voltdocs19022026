@@ -15,15 +15,12 @@ import {
   getDocumentVersionById,
   updateDocument
 } from "../repositories/documents-repo.js";
-import { createSignedStorageUrl, removeFromSupabaseStorage } from "../lib/storage.js";
-
-const splitStoragePath = (filePath: string) => {
-  const parts = filePath.split("/");
-  if (parts.length > 1) {
-    return { bucket: parts[0], key: parts.slice(1).join("/") };
-  }
-  return { bucket: undefined, key: filePath };
-};
+import {
+  createSignedStorageUrl,
+  removeFromSupabaseStorage,
+  resolveStoragePath,
+  resolveStoragePathCandidates
+} from "../lib/storage.js";
 
 const documentCreateSchema = z.object({
   title: z.string().min(1),
@@ -150,9 +147,19 @@ export const getDocumentVersionUrl = async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!id) return res.status(400).json({ error: "Versao invalida." });
   const version = await getDocumentVersionById(client, id);
-  const { bucket, key } = splitStoragePath(version.file_path);
-  const signedUrl = await createSignedStorageUrl(key, 600, bucket);
-  res.json({ data: { url: signedUrl } });
+  const attempts = resolveStoragePathCandidates(version.file_path);
+  let lastError: unknown = null;
+  for (const attempt of attempts) {
+    try {
+      const signedUrl = await createSignedStorageUrl(attempt.key, 600, attempt.bucket);
+      res.json({ data: { url: signedUrl } });
+      return;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  const message = lastError instanceof Error ? lastError.message : "Falha ao gerar URL assinada";
+  res.status(404).json({ error: message });
 };
 
 export const removeDocumentVersion = async (req: Request, res: Response) => {
@@ -161,7 +168,7 @@ export const removeDocumentVersion = async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!id) return res.status(400).json({ error: "Versao invalida." });
   const version = await getDocumentVersionById(client, id);
-  const { bucket, key } = splitStoragePath(version.file_path);
+  const { bucket, key } = resolveStoragePath(version.file_path);
   await removeFromSupabaseStorage(key, bucket);
   await deleteDocumentVersion(client, id);
   res.status(204).send();

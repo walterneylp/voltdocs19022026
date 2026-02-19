@@ -60,6 +60,15 @@ import {
   postCompanyProfile,
   removeCompanyProfile
 } from "../controllers/company-profiles-controller.js";
+import {
+  getAuditPasta1Config,
+  getAuditPasta1Evidences,
+  getAuditPasta1Results,
+  deleteAuditPasta1Evidence,
+  postAuditPasta1Index,
+  postAuditPasta1Evidence,
+  runAuditPasta1
+} from "../controllers/audit-pasta1-controller.js";
 
 export const apiRouter = Router();
 
@@ -133,3 +142,11 @@ apiRouter.get("/company-profiles", asyncHandler(getCompanyProfiles));
 apiRouter.post("/company-profiles", asyncHandler(postCompanyProfile));
 apiRouter.patch("/company-profiles/:id", asyncHandler(patchCompanyProfile));
 apiRouter.delete("/company-profiles/:id", asyncHandler(removeCompanyProfile));
+
+apiRouter.get("/audit/pasta1/config", asyncHandler(getAuditPasta1Config));
+apiRouter.get("/audit/pasta1/results", asyncHandler(getAuditPasta1Results));
+apiRouter.get("/audit/pasta1/evidences", asyncHandler(getAuditPasta1Evidences));
+apiRouter.post("/audit/pasta1/evidences", asyncHandler(postAuditPasta1Evidence));
+apiRouter.delete("/audit/pasta1/evidences", asyncHandler(deleteAuditPasta1Evidence));
+apiRouter.post("/audit/pasta1/index", asyncHandler(postAuditPasta1Index));
+apiRouter.post("/audit/pasta1/run", asyncHandler(runAuditPasta1));

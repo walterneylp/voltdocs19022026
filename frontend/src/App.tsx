@@ -46,6 +46,7 @@ import { GruposEditar } from "./pages/GruposEditar";
 import { GruposMembros } from "./pages/GruposMembros";
 import { GruposNovo } from "./pages/GruposNovo";
 import { MobileApp } from "./pages/MobileApp";
+import { Pasta1Auditoria } from "./pages/Pasta1Auditoria";
 
 export default function App() {
   return (
@@ -102,6 +103,7 @@ export default function App() {
         <Route path="/grupos/editar/:id" element={<GruposEditar />} />
         <Route path="/grupos/membros" element={<GruposMembros />} />
         <Route path="/mobile" element={<MobileApp />} />
+        <Route path="/auditoria/pasta1" element={<Pasta1Auditoria />} />
       </Routes>
     </BrowserRouter>
   );

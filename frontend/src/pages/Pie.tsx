@@ -18,6 +18,12 @@ import "../styles/pie.css";
 
 export function Pie() {
   const authUser = getAuthUser();
+  const formatDate = (value?: string | null) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString("pt-BR");
+  };
   const [documents, setDocuments] = useState<
     Array<{
       id: string;
@@ -876,6 +882,10 @@ export function Pie() {
               </p>
             </div>
             <div className="pie-header-actions">
+              <Link className="pie-button ghost" to="/auditoria/pasta1">
+                <LucideIcon name="file-text" className="pie-button-icon" />
+                Pasta 1 - Auditoria
+              </Link>
               <button
                 className="pie-button"
                 type="button"

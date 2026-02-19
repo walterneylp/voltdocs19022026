@@ -20,7 +20,21 @@ export const login = async (req, res) => {
     const client = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY ?? "", {
         auth: { persistSession: false }
     });
-    const { data, error } = await client.auth.signInWithPassword(payload);
+    let data = null;
+    let error = null;
+    try {
+        const result = await client.auth.signInWithPassword(payload);
+        data = result.data;
+        error = result.error;
+    }
+    catch (err) {
+        const message = err instanceof Error ? err.message : "fetch failed";
+        const cause = err && typeof err === "object" && "cause" in err
+            ? String(err.cause ?? "")
+            : "";
+        res.status(503).json({ error: message, detail: cause || null });
+        return;
+    }
     if (error) {
         res.status(401).json({ error: error.message });
         return;
@@ -81,9 +95,23 @@ export const refreshSession = async (req, res) => {
     const client = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
         auth: { persistSession: false }
     });
-    const { data, error } = await client.auth.refreshSession({
-        refresh_token: payload.refresh_token
-    });
+    let data = null;
+    let error = null;
+    try {
+        const result = await client.auth.refreshSession({
+            refresh_token: payload.refresh_token
+        });
+        data = result.data;
+        error = result.error;
+    }
+    catch (err) {
+        const message = err instanceof Error ? err.message : "fetch failed";
+        const cause = err && typeof err === "object" && "cause" in err
+            ? String(err.cause ?? "")
+            : "";
+        res.status(503).json({ error: message, detail: cause || null });
+        return;
+    }
     if (error || !data.session) {
         res.status(401).json({ error: error?.message ?? "Refresh failed" });
         return;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uploadToSupabaseStorage } from "../lib/storage.js";
+import { resolveStoragePathCandidates, uploadToSupabaseStorage } from "../lib/storage.js";
 import { closeFieldUpdate, createFieldUpdate, listFieldUpdates } from "../repositories/field-updates-repo.js";
 import { createSignedStorageUrl } from "../lib/storage.js";
 const fieldUpdateCreateSchema = z.object({
@@ -93,11 +93,20 @@ export const getFieldUpdateFileUrl = async (req, res) => {
         res.json({ data: { url: path } });
         return;
     }
-    const parts = path.split("/");
-    const bucket = parts.length > 1 ? parts[0] : undefined;
-    const key = parts.length > 1 ? parts.slice(1).join("/") : path;
-    const signedUrl = await createSignedStorageUrl(key, 600, bucket);
-    res.json({ data: { url: signedUrl } });
+    const attempts = resolveStoragePathCandidates(path);
+    let lastError = null;
+    for (const attempt of attempts) {
+        try {
+            const signedUrl = await createSignedStorageUrl(attempt.key, 600, attempt.bucket);
+            res.json({ data: { url: signedUrl } });
+            return;
+        }
+        catch (err) {
+            lastError = err;
+        }
+    }
+    const message = lastError instanceof Error ? lastError.message : "Falha ao gerar URL assinada";
+    res.status(404).json({ error: message });
 };
 export const uploadFieldUpdateFiles = async (req, res) => {
     const client = req.supabase;

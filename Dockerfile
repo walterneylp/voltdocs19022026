@@ -21,6 +21,7 @@ COPY --from=backend-build /app/backend/package*.json ./backend/
 RUN cd backend && npm ci --omit=dev
 COPY --from=backend-build /app/backend/dist ./backend/dist
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
+COPY dados_avulsos /app/dados_avulsos
 EXPOSE 80
 ENV PORT=80
 CMD ["node", "backend/dist/server.js"]
